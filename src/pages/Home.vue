@@ -70,3 +70,6 @@ const openGame = (path: string) => router.push(path);
     </div>
   </div>
 </template>
+
+
+
