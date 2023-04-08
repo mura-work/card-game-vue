@@ -13,8 +13,8 @@ export default class Deck {
     this.cards = suits
       .map((suit, idx) => {
         return [...Array(13)].map((_, i) => {
-          const imageId = idx * 13 + (i + 1);
-          return new Card(suit, String(i), imageId);
+          const id = idx * 13 + (i + 1);
+          return new Card(suit, String(id), id);
         });
       })
       .flat();
