@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import Deck from "../models/Deck.ts";
-import { onMounted, reactive, ref } from "vue";
+import { onMounted, reactive, ref, computed } from "vue";
 import { imageUrl } from "../utils/index.ts";
 const CONST_SCENE = {
   BETTING: "betting", // ベット
@@ -19,17 +19,14 @@ const RESULT_ALERT_VALUES = {
   WIN: {
     title: "YOU WIN!!",
     text: "point up",
-    color: "blue",
   },
   LOSE: {
     title: "YOU LOSE",
     text: "BAD LUCK..........",
-    color: "red",
   },
   DRAW: {
     title: "DRAW",
     text: "Good luck next time",
-    color: "green",
   },
 };
 
@@ -42,10 +39,10 @@ let playerPoint = ref<number>(1000); // 初期値 ローカルセッションで
 const bettingPoint = ref(0);
 const dealerHands = reactive([]);
 const playerHands = reactive([]);
-let resultAlert = reactive({
+let resultDialog = reactive({
+  display: false,
   title: "",
   text: "",
-  color: "",
 });
 
 onMounted(() => {
@@ -85,16 +82,43 @@ const judge = async () => {
   const [dealerScore, playerScore] = await Promise.all(
     [dealerHands, playerHands].map((hands) => calculateHandTotal(hands))
   );
-  if (dealerScore > 21) {
-  }
-  if (dealerScore === playerScore) {
-    resultAlert = RESULT_ALERT_VALUES.DRAW;
+  if (playerScore > 21) {
+    resultDialog = {
+      title: RESULT_ALERT_VALUES.LOSE.title,
+      text: RESULT_ALERT_VALUES.LOSE.text,
+      display: true,
+    };
+  } else if (dealerScore > 21) {
+    resultDialog = {
+      title: RESULT_ALERT_VALUES.WIN.title,
+      text: RESULT_ALERT_VALUES.WIN.text,
+      display: true,
+    };
+  } else if (dealerScore === playerScore) {
+    resultDialog = {
+      title: RESULT_ALERT_VALUES.DRAW.title,
+      text: RESULT_ALERT_VALUES.DRAW.text,
+      display: true,
+    };
   } else if (dealerScore > playerScore) {
-    resultAlert = RESULT_ALERT_VALUES.LOSE;
+    resultDialog = {
+      title: RESULT_ALERT_VALUES.LOSE.title,
+      text: RESULT_ALERT_VALUES.LOSE.text,
+      display: true,
+    };
   } else {
-    resultAlert = RESULT_ALERT_VALUES.WIN;
+    resultDialog = {
+      title: RESULT_ALERT_VALUES.WIN.title,
+      text: RESULT_ALERT_VALUES.WIN.text,
+      display: true,
+    };
   }
   scene.value = CONST_SCENE.RESULT;
+};
+
+const close = () => {
+  resultDialog.display = false;
+  scene.value = CONST_SCENE.BETTING;
 };
 </script>
 
@@ -162,19 +186,23 @@ const judge = async () => {
         </v-btn>
         <v-btn @click="judge()" class="mr-4 bg-yellow">stand</v-btn>
         <v-btn @click="actions(CONST_ACTION.HIT)" class="mr-4 bg-green">
-					hit
-				</v-btn>
+          hit
+        </v-btn>
         <v-btn @click="actions(CONST_ACTION.DOUBLE)" class="mr-4 bg-blue">
-					double
-				</v-btn>
+          double
+        </v-btn>
       </div>
     </div>
   </div>
-  <v-alert
-    v-if="CONST_SCENE.RESULT === scene"
-    class="w-full absolute top-1/2"
-    :color="resultAlert.color"
-    :title="resultAlert.title"
-    :text="resultAlert.text"
-  ></v-alert>
+  <v-dialog :model-value="resultDialog.display" persistent width="auto">
+    <v-card>
+      <v-card-title>{{ resultDialog.title }}</v-card-title>
+      <v-card-text>
+        {{ resultDialog.text }}
+      </v-card-text>
+      <v-card-actions>
+        <v-btn color="primary" block @click="close()"> Close </v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
 </template>
