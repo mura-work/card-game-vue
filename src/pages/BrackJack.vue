@@ -2,6 +2,7 @@
 import Deck from "../models/Deck.ts";
 import { onMounted, reactive, ref, computed } from "vue";
 import { imageUrl } from "../utils/index.ts";
+import { mdiInformation } from "@mdi/js";
 const CONST_SCENE = {
   BETTING: "betting", // ベット
   ACTIONS: "actions", // 各アクションの実施
@@ -44,6 +45,7 @@ let resultDialog = reactive({
   title: "",
   text: "",
 });
+const displayHelpActions = ref(false);
 
 onMounted(() => {
   const deck = new Deck();
@@ -142,8 +144,9 @@ const close = () => {
           :disabled="bettingPoint <= 0"
           class="ml-4 bg-blue"
           size="small"
-          >確定</v-btn
         >
+          確定
+        </v-btn>
       </div>
       <span class="text-white font-bold">掛け金を入力してください。</span>
     </div>
@@ -181,16 +184,40 @@ const close = () => {
         </template>
       </div>
       <div v-if="[CONST_SCENE.ACTIONS, CONST_SCENE.RESULT].includes(scene)">
-        <v-btn @click="actions(CONST_ACTION.SURRENDER)" class="mr-4 bg-red">
+        <v-btn @click="actions(CONST_ACTION.SURRENDER)" class="mr-8 bg-red">
           surrender
         </v-btn>
-        <v-btn @click="judge()" class="mr-4 bg-yellow">stand</v-btn>
-        <v-btn @click="actions(CONST_ACTION.HIT)" class="mr-4 bg-green">
+        <v-btn @click="judge()" class="mr-8 bg-yellow">stand</v-btn>
+        <v-btn @click="actions(CONST_ACTION.HIT)" class="mr-8 bg-green">
           hit
         </v-btn>
-        <v-btn @click="actions(CONST_ACTION.DOUBLE)" class="mr-4 bg-blue">
+        <v-btn @click="actions(CONST_ACTION.DOUBLE)" class="mr-8 bg-blue">
           double
         </v-btn>
+        <v-dialog v-model="displayHelpActions" width="auto">
+          <template v-slot:activator="{ props }">
+            <v-icon
+              :icon="mdiInformation"
+              v-bind="props"
+              size="large"
+              color="white"
+            ></v-icon>
+          </template>
+          <v-card max-width="800px">
+            <v-card-title class="font-bold">アクションの説明</v-card-title>
+            <v-card-text class="leading-3">
+              <div class="mb-4">surrender：最初に配られた 2枚のカードの時点で、プレイヤーが自ら負けを認めること。サレンダーした場合には、ゲームに賭けた金額の半分が戻ってきます。<br></div>
+              <div class="mb-4">stang：カードの追加をストップし、現在のハンド（手元にあるカード）で勝負をすること。<br></div>
+              <div class="mb-4">hit：手札に更に 1 枚のカードを追加すること。手札の合計が 21を超えてしまうことをバスト（bust）と呼び、直ちにプレイヤーの負けとなってしまうので注意が必要です。<br></div>
+              <div class="mb-4">double：ベットを 2 倍にして、もう 1枚だけカードを引くことができます。このアクションは最初に 2枚カードが配られた後しか行うことはできません。</div>
+            </v-card-text>
+            <v-card-actions>
+              <v-btn color="primary" block @click="displayHelpActions = false">
+                Close
+              </v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
       </div>
     </div>
   </div>
