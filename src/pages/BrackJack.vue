@@ -20,14 +20,17 @@ const RESULT_ALERT_VALUES = {
   WIN: {
     title: "YOU WIN!!",
     text: "point up",
+    message: "おめでとうございます！！",
   },
   LOSE: {
     title: "YOU LOSE",
     text: "BAD LUCK..........",
+    message: "残念でした！！！",
   },
   DRAW: {
     title: "DRAW",
     text: "Good luck next time",
+    message: "引き分け！！もっと攻めよう！！",
   },
 };
 
@@ -74,8 +77,8 @@ const actions = (actions: ActionType) => {
 
 const calculateHandTotal = (hands: Hand[]) => {
   return hands.reduce((prev, cur) => {
-    const rank = Number(cur.rank);
-    const score = rank > 10 ? 10 : rank;
+		const rank = cur.getRankNumber()
+    const score = rank > 10 ? 10 : rank; // 11以上は10に揃える
     return prev + score;
   }, 0);
 };
@@ -84,37 +87,23 @@ const judge = async () => {
   const [dealerScore, playerScore] = await Promise.all(
     [dealerHands, playerHands].map((hands) => calculateHandTotal(hands))
   );
+  let resultValues = null;
+  console.log({ dealerScore, dealerHands, playerScore, playerHands });
   if (playerScore > 21) {
-    resultDialog = {
-      title: RESULT_ALERT_VALUES.LOSE.title,
-      text: RESULT_ALERT_VALUES.LOSE.text,
-      display: true,
-    };
+    resultValues = RESULT_ALERT_VALUES.LOSE;
   } else if (dealerScore > 21) {
-    resultDialog = {
-      title: RESULT_ALERT_VALUES.WIN.title,
-      text: RESULT_ALERT_VALUES.WIN.text,
-      display: true,
-    };
+    resultValues = RESULT_ALERT_VALUES.WIN;
   } else if (dealerScore === playerScore) {
-    resultDialog = {
-      title: RESULT_ALERT_VALUES.DRAW.title,
-      text: RESULT_ALERT_VALUES.DRAW.text,
-      display: true,
-    };
+    resultValues = RESULT_ALERT_VALUES.DRAW;
   } else if (dealerScore > playerScore) {
-    resultDialog = {
-      title: RESULT_ALERT_VALUES.LOSE.title,
-      text: RESULT_ALERT_VALUES.LOSE.text,
-      display: true,
-    };
+    resultValues = RESULT_ALERT_VALUES.LOSE;
   } else {
-    resultDialog = {
-      title: RESULT_ALERT_VALUES.WIN.title,
-      text: RESULT_ALERT_VALUES.WIN.text,
-      display: true,
-    };
+    resultValues = RESULT_ALERT_VALUES.WIN;
   }
+  resultDialog = {
+    ...resultValues,
+    display: true,
+  };
   scene.value = CONST_SCENE.RESULT;
 };
 
@@ -206,10 +195,22 @@ const close = () => {
           <v-card max-width="800px">
             <v-card-title class="font-bold">アクションの説明</v-card-title>
             <v-card-text class="leading-3">
-              <div class="mb-4">surrender：最初に配られた 2枚のカードの時点で、プレイヤーが自ら負けを認めること。サレンダーした場合には、ゲームに賭けた金額の半分が戻ってきます。<br></div>
-              <div class="mb-4">stang：カードの追加をストップし、現在のハンド（手元にあるカード）で勝負をすること。<br></div>
-              <div class="mb-4">hit：手札に更に 1 枚のカードを追加すること。手札の合計が 21を超えてしまうことをバスト（bust）と呼び、直ちにプレイヤーの負けとなってしまうので注意が必要です。<br></div>
-              <div class="mb-4">double：ベットを 2 倍にして、もう 1枚だけカードを引くことができます。このアクションは最初に 2枚カードが配られた後しか行うことはできません。</div>
+              <div class="mb-4">
+                surrender：最初に配られた
+                2枚のカードの時点で、プレイヤーが自ら負けを認めること。サレンダーした場合には、ゲームに賭けた金額の半分が戻ってきます。<br />
+              </div>
+              <div class="mb-4">
+                stang：カードの追加をストップし、現在のハンド（手元にあるカード）で勝負をすること。<br />
+              </div>
+              <div class="mb-4">
+                hit：手札に更に 1 枚のカードを追加すること。手札の合計が
+                21を超えてしまうことをバスト（bust）と呼び、直ちにプレイヤーの負けとなってしまうので注意が必要です。<br />
+              </div>
+              <div class="mb-4">
+                double：ベットを 2 倍にして、もう
+                1枚だけカードを引くことができます。このアクションは最初に
+                2枚カードが配られた後しか行うことはできません。
+              </div>
             </v-card-text>
             <v-card-actions>
               <v-btn color="primary" block @click="displayHelpActions = false">
@@ -226,6 +227,9 @@ const close = () => {
       <v-card-title>{{ resultDialog.title }}</v-card-title>
       <v-card-text>
         {{ resultDialog.text }}
+      </v-card-text>
+      <v-card-text>
+        {{ resultDialog.message }}
       </v-card-text>
       <v-card-actions>
         <v-btn color="primary" block @click="close()"> Close </v-btn>
