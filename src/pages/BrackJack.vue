@@ -111,6 +111,15 @@ const close = () => {
   resultDialog.display = false;
   scene.value = CONST_SCENE.BETTING;
 };
+
+const surrender = () => {
+	resultDialog = {
+    display: true,
+    title: "降伏",
+		text: "あなたは負けを認めました。",
+  };
+	scene.value = CONST_SCENE.RESULT;
+}
 </script>
 
 <template>
@@ -173,7 +182,7 @@ const close = () => {
         </template>
       </div>
       <div v-if="[CONST_SCENE.ACTIONS, CONST_SCENE.RESULT].includes(scene)">
-        <v-btn @click="actions(CONST_ACTION.SURRENDER)" class="mr-8 bg-red">
+        <v-btn @click="surrender()" class="mr-8 bg-red">
           surrender
         </v-btn>
         <v-btn @click="judge()" class="mr-8 bg-yellow">stand</v-btn>
