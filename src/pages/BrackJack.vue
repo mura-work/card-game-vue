@@ -138,6 +138,11 @@ const surrender = () => {
   scene.value = "result";
 	playerPoint.value -= bettingPoint.value;
 };
+
+const close = () => {
+  resultDialog.display = false;
+  scene.value = CONST_SCENE.BETTING;
+};
 </script>
 
 <template>
