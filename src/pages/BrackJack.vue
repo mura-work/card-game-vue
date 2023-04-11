@@ -38,6 +38,7 @@ let playerPoint = ref<number>(1000); // 初期値 ローカルセッションで
 const bettingPoint = ref(0);
 const dealerHands = reactive<Card[]>([]);
 const playerHands = reactive<Card[]>([]);
+const deck = reactive<Deck>(new Deck());
 let resultDialog = reactive<{
   display: boolean;
   title: string;
@@ -56,8 +57,6 @@ onMounted(() => {
 });
 
 const init = () => {
-  const deck = new Deck();
-  console.log({ deck });
   dealerHands.splice(0);
   playerHands.splice(0);
   dealerHands.push(...[deck.pick(), deck.pick()]);
@@ -78,8 +77,13 @@ const confirmBettingPoint = () => {
   scene.value = "actions";
 };
 
-const actions = (actions: ActionType) => {
-  console.log({ actions });
+const hit = () => {
+  const newCard = deck.pick();
+  playerHands.push(newCard);
+};
+
+const double = () => {
+  hit(); // 一旦一枚引くようにする
 };
 
 const calculateHandTotal = (hands: Card[]) => {
@@ -194,8 +198,8 @@ const surrender = () => {
       <div v-if="['actions', 'result'].includes(scene)">
         <v-btn @click="surrender()" class="mr-8 bg-red"> surrender </v-btn>
         <v-btn @click="judge()" class="mr-8 bg-yellow">stand</v-btn>
-        <v-btn class="mr-8 bg-green"> hit </v-btn>
-        <v-btn class="mr-8 bg-blue"> double </v-btn>
+        <v-btn @click="hit()" class="mr-8 bg-green"> hit </v-btn>
+        <v-btn @click="double()" class="mr-8 bg-blue"> double </v-btn>
         <v-dialog v-model="displayHelpActions" width="auto">
           <template v-slot:activator="{ props }">
             <v-icon
