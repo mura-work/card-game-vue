@@ -3,7 +3,7 @@ import Deck from "../models/Deck";
 import { onMounted, reactive, ref, computed } from "vue";
 import { imageUrl } from "../utils/index";
 import { mdiInformation } from "@mdi/js";
-import Card from "../models/Card"
+import Card from "../models/Card";
 const CONST_ACTION = {
   SURRENDER: "surrender",
   STAND: "stand",
@@ -38,20 +38,31 @@ let playerPoint = ref<number>(1000); // 初期値 ローカルセッションで
 const bettingPoint = ref(0);
 const dealerHands = reactive<Card[]>([]);
 const playerHands = reactive<Card[]>([]);
-let resultDialog = reactive<{display: boolean, title: string, text: string, message?: string}>({
+let resultDialog = reactive<{
+  display: boolean;
+  title: string;
+  text: string;
+  message?: string;
+}>({
   display: false,
   title: "",
   text: "",
-	message: "",
+  message: "",
 });
 const displayHelpActions = ref(false);
 
 onMounted(() => {
+  init();
+});
+
+const init = () => {
   const deck = new Deck();
   console.log({ deck });
+  dealerHands.splice(0);
+  playerHands.splice(0);
   dealerHands.push(...[deck.pick(), deck.pick()]);
   playerHands.push(...[deck.pick(), deck.pick()]);
-});
+};
 
 const confirmBettingPoint = () => {
   console.log({ bettingPoint }, bettingPoint.value);
@@ -73,7 +84,7 @@ const actions = (actions: ActionType) => {
 
 const calculateHandTotal = (hands: Card[]) => {
   return hands.reduce((prev, cur) => {
-		const rank = cur.getRankNumber()
+    const rank = cur.getRankNumber();
     const score = rank > 10 ? 10 : rank; // 11以上は10に揃える
     return prev + score;
   }, 0);
@@ -81,7 +92,9 @@ const calculateHandTotal = (hands: Card[]) => {
 
 const judge = async () => {
   const [dealerScore, playerScore] = await Promise.all(
-    [dealerHands, playerHands].map((hands) => calculateHandTotal(hands as Card[]))
+    [dealerHands, playerHands].map((hands) =>
+      calculateHandTotal(hands as Card[])
+    )
   );
   let resultValues = null;
   console.log({ dealerScore, dealerHands, playerScore, playerHands });
@@ -106,16 +119,17 @@ const judge = async () => {
 const close = () => {
   resultDialog.display = false;
   scene.value = "betting";
+  init();
 };
 
 const surrender = () => {
-	resultDialog = {
+  resultDialog = {
     display: true,
     title: "降伏",
-		text: "あなたは負けを認めました。",
+    text: "あなたは負けを認めました。",
   };
-	scene.value = "result";
-}
+  scene.value = "result";
+};
 </script>
 
 <template>
@@ -178,16 +192,10 @@ const surrender = () => {
         </template>
       </div>
       <div v-if="['actions', 'result'].includes(scene)">
-        <v-btn @click="surrender()" class="mr-8 bg-red">
-          surrender
-        </v-btn>
+        <v-btn @click="surrender()" class="mr-8 bg-red"> surrender </v-btn>
         <v-btn @click="judge()" class="mr-8 bg-yellow">stand</v-btn>
-        <v-btn class="mr-8 bg-green">
-          hit
-        </v-btn>
-        <v-btn class="mr-8 bg-blue">
-          double
-        </v-btn>
+        <v-btn class="mr-8 bg-green"> hit </v-btn>
+        <v-btn class="mr-8 bg-blue"> double </v-btn>
         <v-dialog v-model="displayHelpActions" width="auto">
           <template v-slot:activator="{ props }">
             <v-icon
