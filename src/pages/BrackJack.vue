@@ -101,17 +101,20 @@ const judge = async () => {
     )
   );
   let resultValues = null;
-  console.log({ dealerScore, dealerHands, playerScore, playerHands });
   if (playerScore > 21) {
     resultValues = RESULT_ALERT_VALUES.LOSE;
+		playerPoint.value -= bettingPoint.value;
   } else if (dealerScore > 21) {
     resultValues = RESULT_ALERT_VALUES.WIN;
+		playerPoint.value += bettingPoint.value * 2;
   } else if (dealerScore === playerScore) {
     resultValues = RESULT_ALERT_VALUES.DRAW;
   } else if (dealerScore > playerScore) {
     resultValues = RESULT_ALERT_VALUES.LOSE;
+		playerPoint.value -= bettingPoint.value;
   } else {
     resultValues = RESULT_ALERT_VALUES.WIN;
+		playerPoint.value += bettingPoint.value * 2;
   }
   resultDialog = {
     ...resultValues,
@@ -133,6 +136,7 @@ const surrender = () => {
     text: "あなたは負けを認めました。",
   };
   scene.value = "result";
+	playerPoint.value -= bettingPoint.value;
 };
 </script>
 
