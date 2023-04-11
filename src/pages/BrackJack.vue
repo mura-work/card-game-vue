@@ -1,14 +1,9 @@
 <script setup lang="ts">
-import Deck from "../models/Deck.ts";
+import Deck from "../models/Deck";
 import { onMounted, reactive, ref, computed } from "vue";
-import { imageUrl } from "../utils/index.ts";
+import { imageUrl } from "../utils/index";
 import { mdiInformation } from "@mdi/js";
-const CONST_SCENE = {
-  BETTING: "betting", // ベット
-  ACTIONS: "actions", // 各アクションの実施
-  RESULT: "result", // 最終結果
-};
-
+import Card from "../models/Card"
 const CONST_ACTION = {
   SURRENDER: "surrender",
   STAND: "stand",
@@ -38,15 +33,16 @@ type SceneType = "betting" | "actions" | "result";
 type ActionType = "surrender" | "stand" | "hit" | "double";
 type ResultType = "win" | "lose" | "draw";
 
-let scene = ref<SceneType>(CONST_SCENE.BETTING);
+let scene = ref<SceneType>("betting");
 let playerPoint = ref<number>(1000); // 初期値 ローカルセッションで保持する
 const bettingPoint = ref(0);
-const dealerHands = reactive([]);
-const playerHands = reactive([]);
-let resultDialog = reactive({
+const dealerHands = reactive<Card[]>([]);
+const playerHands = reactive<Card[]>([]);
+let resultDialog = reactive<{display: boolean, title: string, text: string, message?: string}>({
   display: false,
   title: "",
   text: "",
+	message: "",
 });
 const displayHelpActions = ref(false);
 
@@ -68,14 +64,14 @@ const confirmBettingPoint = () => {
     );
     return;
   }
-  scene.value = CONST_SCENE.ACTIONS;
+  scene.value = "actions";
 };
 
 const actions = (actions: ActionType) => {
   console.log({ actions });
 };
 
-const calculateHandTotal = (hands: Hand[]) => {
+const calculateHandTotal = (hands: Card[]) => {
   return hands.reduce((prev, cur) => {
 		const rank = cur.getRankNumber()
     const score = rank > 10 ? 10 : rank; // 11以上は10に揃える
@@ -85,7 +81,7 @@ const calculateHandTotal = (hands: Hand[]) => {
 
 const judge = async () => {
   const [dealerScore, playerScore] = await Promise.all(
-    [dealerHands, playerHands].map((hands) => calculateHandTotal(hands))
+    [dealerHands, playerHands].map((hands) => calculateHandTotal(hands as Card[]))
   );
   let resultValues = null;
   console.log({ dealerScore, dealerHands, playerScore, playerHands });
@@ -104,12 +100,12 @@ const judge = async () => {
     ...resultValues,
     display: true,
   };
-  scene.value = CONST_SCENE.RESULT;
+  scene.value = "result";
 };
 
 const close = () => {
   resultDialog.display = false;
-  scene.value = CONST_SCENE.BETTING;
+  scene.value = "betting";
 };
 
 const surrender = () => {
@@ -118,13 +114,13 @@ const surrender = () => {
     title: "降伏",
 		text: "あなたは負けを認めました。",
   };
-	scene.value = CONST_SCENE.RESULT;
+	scene.value = "result";
 }
 </script>
 
 <template>
   <div class="h-screen w-screen bg-green-800 flex justify-center flex-col">
-    <div v-if="scene === CONST_SCENE.BETTING" class="text-center">
+    <div v-if="scene === 'betting'" class="text-center">
       <h2 class="text-white font-bold text-4xl mb-16">Betting</h2>
       <div class="text-white font-bold mb-4 text-center">
         現在の所持Pt: {{ playerPoint }}
@@ -150,7 +146,7 @@ const surrender = () => {
     </div>
     <div
       class="w-3/5 max-w-3/5 w-auto text-center mb-16"
-      v-if="[CONST_SCENE.ACTIONS, CONST_SCENE.RESULT].includes(scene)"
+      v-if="['actions', 'result'].includes(scene)"
     >
       <h2 class="text-white font-bold text-4xl mb-8">Dealer</h2>
       <div class="w-auto h-auto">
@@ -167,7 +163,7 @@ const surrender = () => {
     </div>
     <div
       class="max-w-3/5 w-auto w-3/5 text-center"
-      v-if="[CONST_SCENE.ACTIONS, CONST_SCENE.RESULT].includes(scene)"
+      v-if="['actions', 'result'].includes(scene)"
     >
       <h2 class="text-white font-bold text-4xl mb-4">Player</h2>
       <div class="w-auto h-auto mb-8">
@@ -181,15 +177,15 @@ const surrender = () => {
           />
         </template>
       </div>
-      <div v-if="[CONST_SCENE.ACTIONS, CONST_SCENE.RESULT].includes(scene)">
+      <div v-if="['actions', 'result'].includes(scene)">
         <v-btn @click="surrender()" class="mr-8 bg-red">
           surrender
         </v-btn>
         <v-btn @click="judge()" class="mr-8 bg-yellow">stand</v-btn>
-        <v-btn @click="actions(CONST_ACTION.HIT)" class="mr-8 bg-green">
+        <v-btn class="mr-8 bg-green">
           hit
         </v-btn>
-        <v-btn @click="actions(CONST_ACTION.DOUBLE)" class="mr-8 bg-blue">
+        <v-btn class="mr-8 bg-blue">
           double
         </v-btn>
         <v-dialog v-model="displayHelpActions" width="auto">
