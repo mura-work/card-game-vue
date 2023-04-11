@@ -1,14 +1,9 @@
 <script setup lang="ts">
-import Deck from "../models/Deck.ts";
+import Deck from "../models/Deck";
 import { onMounted, reactive, ref, computed } from "vue";
-import { imageUrl } from "../utils/index.ts";
+import { imageUrl } from "../utils/index";
 import { mdiInformation } from "@mdi/js";
-const CONST_SCENE = {
-  BETTING: "betting", // ベット
-  ACTIONS: "actions", // 各アクションの実施
-  RESULT: "result", // 最終結果
-};
-
+import Card from "../models/Card";
 const CONST_ACTION = {
   SURRENDER: "surrender",
   STAND: "stand",
@@ -20,14 +15,17 @@ const RESULT_ALERT_VALUES = {
   WIN: {
     title: "YOU WIN!!",
     text: "point up",
+    message: "おめでとうございます！！",
   },
   LOSE: {
     title: "YOU LOSE",
     text: "BAD LUCK..........",
+    message: "残念でした！！！",
   },
   DRAW: {
     title: "DRAW",
     text: "Good luck next time",
+    message: "引き分け！！もっと攻めよう！！",
   },
 };
 
@@ -35,24 +33,35 @@ type SceneType = "betting" | "actions" | "result";
 type ActionType = "surrender" | "stand" | "hit" | "double";
 type ResultType = "win" | "lose" | "draw";
 
-let scene = ref<SceneType>(CONST_SCENE.BETTING);
+let scene = ref<SceneType>("betting");
 let playerPoint = ref<number>(1000); // 初期値 ローカルセッションで保持する
 const bettingPoint = ref(0);
-const dealerHands = reactive([]);
-const playerHands = reactive([]);
-let resultDialog = reactive({
+const dealerHands = reactive<Card[]>([]);
+const playerHands = reactive<Card[]>([]);
+const deck = reactive<Deck>(new Deck());
+let resultDialog = reactive<{
+  display: boolean;
+  title: string;
+  text: string;
+  message?: string;
+}>({
   display: false,
   title: "",
   text: "",
+  message: "",
 });
 const displayHelpActions = ref(false);
 
 onMounted(() => {
-  const deck = new Deck();
-  console.log({ deck });
+  init();
+});
+
+const init = () => {
+  dealerHands.splice(0);
+  playerHands.splice(0);
   dealerHands.push(...[deck.pick(), deck.pick()]);
   playerHands.push(...[deck.pick(), deck.pick()]);
-});
+};
 
 const confirmBettingPoint = () => {
   console.log({ bettingPoint }, bettingPoint.value);
@@ -65,57 +74,69 @@ const confirmBettingPoint = () => {
     );
     return;
   }
-  scene.value = CONST_SCENE.ACTIONS;
+  scene.value = "actions";
 };
 
-const actions = (actions: ActionType) => {
-  console.log({ actions });
+const hit = () => {
+  const newCard = deck.pick();
+  playerHands.push(newCard);
 };
 
-const calculateHandTotal = (hands: Hand[]) => {
+const double = () => {
+  hit(); // 一旦一枚引くようにする
+};
+
+const calculateHandTotal = (hands: Card[]) => {
   return hands.reduce((prev, cur) => {
-    const rank = Number(cur.rank);
-    const score = rank > 10 ? 10 : rank;
+    const rank = cur.getRankNumber();
+    const score = rank > 10 ? 10 : rank; // 11以上は10に揃える
     return prev + score;
   }, 0);
 };
 
 const judge = async () => {
   const [dealerScore, playerScore] = await Promise.all(
-    [dealerHands, playerHands].map((hands) => calculateHandTotal(hands))
+    [dealerHands, playerHands].map((hands) =>
+      calculateHandTotal(hands as Card[])
+    )
   );
+  let resultValues = null;
   if (playerScore > 21) {
-    resultDialog = {
-      title: RESULT_ALERT_VALUES.LOSE.title,
-      text: RESULT_ALERT_VALUES.LOSE.text,
-      display: true,
-    };
+    resultValues = RESULT_ALERT_VALUES.LOSE;
+		playerPoint.value -= bettingPoint.value;
   } else if (dealerScore > 21) {
-    resultDialog = {
-      title: RESULT_ALERT_VALUES.WIN.title,
-      text: RESULT_ALERT_VALUES.WIN.text,
-      display: true,
-    };
+    resultValues = RESULT_ALERT_VALUES.WIN;
+		playerPoint.value += bettingPoint.value * 2;
   } else if (dealerScore === playerScore) {
-    resultDialog = {
-      title: RESULT_ALERT_VALUES.DRAW.title,
-      text: RESULT_ALERT_VALUES.DRAW.text,
-      display: true,
-    };
+    resultValues = RESULT_ALERT_VALUES.DRAW;
   } else if (dealerScore > playerScore) {
-    resultDialog = {
-      title: RESULT_ALERT_VALUES.LOSE.title,
-      text: RESULT_ALERT_VALUES.LOSE.text,
-      display: true,
-    };
+    resultValues = RESULT_ALERT_VALUES.LOSE;
+		playerPoint.value -= bettingPoint.value;
   } else {
-    resultDialog = {
-      title: RESULT_ALERT_VALUES.WIN.title,
-      text: RESULT_ALERT_VALUES.WIN.text,
-      display: true,
-    };
+    resultValues = RESULT_ALERT_VALUES.WIN;
+		playerPoint.value += bettingPoint.value * 2;
   }
-  scene.value = CONST_SCENE.RESULT;
+  resultDialog = {
+    ...resultValues,
+    display: true,
+  };
+  scene.value = "result";
+};
+
+const close = () => {
+  resultDialog.display = false;
+  scene.value = "betting";
+  init();
+};
+
+const surrender = () => {
+  resultDialog = {
+    display: true,
+    title: "降伏",
+    text: "あなたは負けを認めました。",
+  };
+  scene.value = "result";
+	playerPoint.value -= bettingPoint.value;
 };
 
 const close = () => {
@@ -126,7 +147,7 @@ const close = () => {
 
 <template>
   <div class="h-screen w-screen bg-green-800 flex justify-center flex-col">
-    <div v-if="scene === CONST_SCENE.BETTING" class="text-center">
+    <div v-if="scene === 'betting'" class="text-center">
       <h2 class="text-white font-bold text-4xl mb-16">Betting</h2>
       <div class="text-white font-bold mb-4 text-center">
         現在の所持Pt: {{ playerPoint }}
@@ -152,7 +173,7 @@ const close = () => {
     </div>
     <div
       class="w-3/5 max-w-3/5 w-auto text-center mb-16"
-      v-if="[CONST_SCENE.ACTIONS, CONST_SCENE.RESULT].includes(scene)"
+      v-if="['actions', 'result'].includes(scene)"
     >
       <h2 class="text-white font-bold text-4xl mb-8">Dealer</h2>
       <div class="w-auto h-auto">
@@ -169,7 +190,7 @@ const close = () => {
     </div>
     <div
       class="max-w-3/5 w-auto w-3/5 text-center"
-      v-if="[CONST_SCENE.ACTIONS, CONST_SCENE.RESULT].includes(scene)"
+      v-if="['actions', 'result'].includes(scene)"
     >
       <h2 class="text-white font-bold text-4xl mb-4">Player</h2>
       <div class="w-auto h-auto mb-8">
@@ -183,17 +204,11 @@ const close = () => {
           />
         </template>
       </div>
-      <div v-if="[CONST_SCENE.ACTIONS, CONST_SCENE.RESULT].includes(scene)">
-        <v-btn @click="actions(CONST_ACTION.SURRENDER)" class="mr-8 bg-red">
-          surrender
-        </v-btn>
+      <div v-if="['actions', 'result'].includes(scene)">
+        <v-btn @click="surrender()" class="mr-8 bg-red"> surrender </v-btn>
         <v-btn @click="judge()" class="mr-8 bg-yellow">stand</v-btn>
-        <v-btn @click="actions(CONST_ACTION.HIT)" class="mr-8 bg-green">
-          hit
-        </v-btn>
-        <v-btn @click="actions(CONST_ACTION.DOUBLE)" class="mr-8 bg-blue">
-          double
-        </v-btn>
+        <v-btn @click="hit()" class="mr-8 bg-green"> hit </v-btn>
+        <v-btn @click="double()" class="mr-8 bg-blue"> double </v-btn>
         <v-dialog v-model="displayHelpActions" width="auto">
           <template v-slot:activator="{ props }">
             <v-icon
@@ -206,10 +221,22 @@ const close = () => {
           <v-card max-width="800px">
             <v-card-title class="font-bold">アクションの説明</v-card-title>
             <v-card-text class="leading-3">
-              <div class="mb-4">surrender：最初に配られた 2枚のカードの時点で、プレイヤーが自ら負けを認めること。サレンダーした場合には、ゲームに賭けた金額の半分が戻ってきます。<br></div>
-              <div class="mb-4">stang：カードの追加をストップし、現在のハンド（手元にあるカード）で勝負をすること。<br></div>
-              <div class="mb-4">hit：手札に更に 1 枚のカードを追加すること。手札の合計が 21を超えてしまうことをバスト（bust）と呼び、直ちにプレイヤーの負けとなってしまうので注意が必要です。<br></div>
-              <div class="mb-4">double：ベットを 2 倍にして、もう 1枚だけカードを引くことができます。このアクションは最初に 2枚カードが配られた後しか行うことはできません。</div>
+              <div class="mb-4">
+                surrender：最初に配られた
+                2枚のカードの時点で、プレイヤーが自ら負けを認めること。サレンダーした場合には、ゲームに賭けた金額の半分が戻ってきます。<br />
+              </div>
+              <div class="mb-4">
+                stang：カードの追加をストップし、現在のハンド（手元にあるカード）で勝負をすること。<br />
+              </div>
+              <div class="mb-4">
+                hit：手札に更に 1 枚のカードを追加すること。手札の合計が
+                21を超えてしまうことをバスト（bust）と呼び、直ちにプレイヤーの負けとなってしまうので注意が必要です。<br />
+              </div>
+              <div class="mb-4">
+                double：ベットを 2 倍にして、もう
+                1枚だけカードを引くことができます。このアクションは最初に
+                2枚カードが配られた後しか行うことはできません。
+              </div>
             </v-card-text>
             <v-card-actions>
               <v-btn color="primary" block @click="displayHelpActions = false">
@@ -226,6 +253,9 @@ const close = () => {
       <v-card-title>{{ resultDialog.title }}</v-card-title>
       <v-card-text>
         {{ resultDialog.text }}
+      </v-card-text>
+      <v-card-text>
+        {{ resultDialog.message }}
       </v-card-text>
       <v-card-actions>
         <v-btn color="primary" block @click="close()"> Close </v-btn>
