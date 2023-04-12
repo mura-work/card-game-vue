@@ -14,9 +14,8 @@ const store = createStore<State>({
     },
   },
   actions: {
-    setGamePoint({ commit }, data) {
+    updateGamePoint({ commit }, data) {
       sessionStorage.setItem("game-point", JSON.stringify(data));
-      commit("setGamePoint", data);
     },
   },
   getters: {

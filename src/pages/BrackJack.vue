@@ -58,6 +58,8 @@ let resultDialog = reactive<{
 const displayHelpActions = ref(false);
 
 onMounted(() => {
+  const gamePoint = sessionStorage.getItem("game-point") ?? 0;
+  store.commit("setGamePoint", gamePoint);
   playerPoint.value = store.getters.getGamePoint;
   init();
 });

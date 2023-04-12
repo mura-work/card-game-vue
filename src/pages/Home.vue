@@ -9,7 +9,9 @@ const router = useRouter();
 const store = useStore();
 
 onMounted(() => {
-  const gamePoint = sessionStorage.getItem("game-point") ?? 1000;
+  const getJsonData = sessionStorage.getItem("game-point");
+  const gamePoint = getJsonData ? JSON.parse(getJsonData) : 1000;
+  store.dispatch('updateGamePoint', gamePoint)
   store.commit("setGamePoint", gamePoint);
 });
 
