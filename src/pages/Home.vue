@@ -2,8 +2,17 @@
 import ComingSoonImg from "../assets/images/coming-soon.png";
 import BlackJackImg from "../assets/images/brack-jack-image.png";
 import { useRouter } from "vue-router";
+import { onMounted } from "vue";
+import { useStore } from "vuex";
 
 const router = useRouter();
+const store = useStore();
+
+onMounted(() => {
+  const gamePoint = sessionStorage.getItem("game-point") ?? 1000;
+  store.commit("setGamePoint", gamePoint);
+});
+
 const openGame = (path: string) => router.push(path);
 </script>
 
@@ -70,6 +79,3 @@ const openGame = (path: string) => router.push(path);
     </div>
   </div>
 </template>
-
-
-
