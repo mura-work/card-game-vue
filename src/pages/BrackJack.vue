@@ -11,7 +11,7 @@ const CONST_ACTION = {
   DOUBLE: "double",
 };
 
-const RESULT_ALERT_VALUES = {
+const RESULT_ALERT_PROPS = {
   WIN: {
     title: "YOU WIN!!",
     text: "point up",
@@ -36,6 +36,7 @@ type ResultType = "win" | "lose" | "draw";
 let scene = ref<SceneType>("betting");
 let playerPoint = ref<number>(1000); // 初期値 ローカルセッションで保持する
 const bettingPoint = ref(0);
+let isDoublePoint = ref<boolean>(false);
 const dealerHands = reactive<Card[]>([]);
 const playerHands = reactive<Card[]>([]);
 const deck = reactive<Deck>(new Deck());
@@ -84,6 +85,7 @@ const hit = () => {
 
 const double = () => {
   hit(); // 一旦一枚引くようにする
+  isDoublePoint = true;
 };
 
 const calculateHandTotal = (hands: Card[]) => {
@@ -100,24 +102,33 @@ const judge = async () => {
       calculateHandTotal(hands as Card[])
     )
   );
-  let resultValues = null;
+  let resultAlertProps = null;
+  let resultValue: "WIN" | "LOSE" | "DRAW" = "WIN"; // 一旦初期値WIN
   if (playerScore > 21) {
-    resultValues = RESULT_ALERT_VALUES.LOSE;
-		playerPoint.value -= bettingPoint.value;
+    resultAlertProps = RESULT_ALERT_PROPS.LOSE;
+    resultValue = "LOSE";
   } else if (dealerScore > 21) {
-    resultValues = RESULT_ALERT_VALUES.WIN;
-		playerPoint.value += bettingPoint.value * 2;
+    resultAlertProps = RESULT_ALERT_PROPS.WIN;
+    resultValue = "WIN";
   } else if (dealerScore === playerScore) {
-    resultValues = RESULT_ALERT_VALUES.DRAW;
+    resultAlertProps = RESULT_ALERT_PROPS.DRAW;
+    resultValue = "DRAW";
   } else if (dealerScore > playerScore) {
-    resultValues = RESULT_ALERT_VALUES.LOSE;
-		playerPoint.value -= bettingPoint.value;
+    resultAlertProps = RESULT_ALERT_PROPS.LOSE;
+    resultValue = "LOSE";
   } else {
-    resultValues = RESULT_ALERT_VALUES.WIN;
-		playerPoint.value += bettingPoint.value * 2;
+    resultAlertProps = RESULT_ALERT_PROPS.WIN;
+    resultValue = "WIN";
   }
+
+  if (resultValue === "LOSE") {
+    playerPoint.value -= bettingPoint.value * (isDoublePoint ? 2 : 1)
+  } else if (resultValue === "WIN") {
+		playerPoint.value += bettingPoint.value * (isDoublePoint ? 2 : 1)
+	}
+
   resultDialog = {
-    ...resultValues,
+    ...resultAlertProps,
     display: true,
   };
   scene.value = "result";
@@ -136,12 +147,7 @@ const surrender = () => {
     text: "あなたは負けを認めました。",
   };
   scene.value = "result";
-	playerPoint.value -= bettingPoint.value;
-};
-
-const close = () => {
-  resultDialog.display = false;
-  scene.value = CONST_SCENE.BETTING;
+  playerPoint.value -= bettingPoint.value;
 };
 </script>
 
