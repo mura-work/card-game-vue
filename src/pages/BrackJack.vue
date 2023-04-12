@@ -4,6 +4,8 @@ import { onMounted, reactive, ref, computed } from "vue";
 import { imageUrl } from "../utils/index";
 import { mdiInformation } from "@mdi/js";
 import Card from "../models/Card";
+import { useStore } from "vuex";
+
 const CONST_ACTION = {
   SURRENDER: "surrender",
   STAND: "stand",
@@ -33,8 +35,10 @@ type SceneType = "betting" | "actions" | "result";
 type ActionType = "surrender" | "stand" | "hit" | "double";
 type ResultType = "win" | "lose" | "draw";
 
+const store = useStore();
+
 let scene = ref<SceneType>("betting");
-let playerPoint = ref<number>(1000); // 初期値 ローカルセッションで保持する
+let playerPoint = ref<number>(0); // 初期値 ローカルセッションで保持する
 const bettingPoint = ref(0);
 let isDoublePoint = ref<boolean>(false);
 const dealerHands = reactive<Card[]>([]);
@@ -54,6 +58,9 @@ let resultDialog = reactive<{
 const displayHelpActions = ref(false);
 
 onMounted(() => {
+  const gamePoint = sessionStorage.getItem("game-point") ?? 0;
+  store.commit("setGamePoint", gamePoint);
+  playerPoint.value = store.getters.getGamePoint;
   init();
 });
 
