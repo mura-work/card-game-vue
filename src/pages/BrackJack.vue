@@ -5,7 +5,10 @@ import { imageUrl } from "../utils/index";
 import { mdiInformation } from "@mdi/js";
 import Card from "../models/Card";
 import { useStore } from "vuex";
-import { getGamePointFromSession, setGamePointFromSession } from "../utils/sessionStorage.ts";
+import {
+  getGamePointFromSession,
+  setGamePointFromSession,
+} from "../utils/sessionStorage.ts";
 
 const CONST_ACTION = {
   SURRENDER: "surrender",
@@ -56,6 +59,11 @@ let resultDialog = reactive<{
   text: "",
   message: "",
 });
+let alertDialog = reactive({
+  display: false,
+  title: "",
+  text: "",
+});
 const displayHelpActions = ref(false);
 
 onMounted(() => {
@@ -75,12 +83,18 @@ const init = () => {
 
 const confirmBettingPoint = () => {
   if (bettingPoint.value <= 0) {
-    console.log("ポイントが入力されていません");
+    Object.assign(alertDialog, {
+      display: true,
+      title: "警告",
+      text: "ポイントが入力されていません。入力をやり直してください",
+    });
     return;
   } else if (bettingPoint.value > playerPoint.value) {
-    console.log(
-      "所持ポイントよりも入力ポイントの方が多いです。所持ポイントを上回らないようにしてください"
-    );
+    Object.assign(alertDialog, {
+      display: true,
+      title: "警告",
+      text: "所持ポイントよりも入力ポイントの方が多いです。所持ポイントを上回らないようにしてください",
+    });
     return;
   }
   scene.value = "actions";
@@ -145,7 +159,7 @@ const judge = async () => {
 const close = () => {
   resultDialog.display = false;
   scene.value = "betting";
-  setGamePointFromSession(playerPoint.value)
+  setGamePointFromSession(playerPoint.value);
   init();
 };
 
@@ -263,6 +277,21 @@ const surrender = () => {
       </div>
     </div>
   </div>
+  <!-- ベットポイントに関するエラーダイアログ -->
+  <v-dialog v-model="alertDialog.display" persistent width="auto">
+    <v-card>
+      <v-card-title>{{ alertDialog.title }}</v-card-title>
+      <v-card-text>
+        {{ alertDialog.text }}
+      </v-card-text>
+      <v-card-actions>
+        <v-btn color="primary" block @click="alertDialog.display = false">
+          Close
+        </v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
+  <!-- 勝敗の結果ダイアログ -->
   <v-dialog :model-value="resultDialog.display" persistent width="auto">
     <v-card>
       <v-card-title>{{ resultDialog.title }}</v-card-title>
