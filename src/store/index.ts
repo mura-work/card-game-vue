@@ -13,11 +13,11 @@ const store = createStore<State>({
       state.gamePoint = data;
     },
   },
-  actions: {
-    updateGamePoint({ commit }, data) {
-      sessionStorage.setItem("game-point", JSON.stringify(data));
-    },
-  },
+  // actions: {
+  //   updateGamePoint({ commit }, data) {
+
+  //   },
+  // },
   getters: {
     getGamePoint(state) {
       return state.gamePoint;

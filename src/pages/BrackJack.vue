@@ -5,6 +5,7 @@ import { imageUrl } from "../utils/index";
 import { mdiInformation } from "@mdi/js";
 import Card from "../models/Card";
 import { useStore } from "vuex";
+import { getGamePointFromSession, setGamePointFromSession } from "../utils/sessionStorage.ts";
 
 const CONST_ACTION = {
   SURRENDER: "surrender",
@@ -39,7 +40,7 @@ const store = useStore();
 
 let scene = ref<SceneType>("betting");
 let playerPoint = ref<number>(0); // 初期値 ローカルセッションで保持する
-const bettingPoint = ref(0);
+const bettingPoint = ref<number>(0);
 let isDoublePoint = ref<boolean>(false);
 const dealerHands = reactive<Card[]>([]);
 const playerHands = reactive<Card[]>([]);
@@ -58,13 +59,14 @@ let resultDialog = reactive<{
 const displayHelpActions = ref(false);
 
 onMounted(() => {
-  const gamePoint = sessionStorage.getItem("game-point") ?? 0;
+  const gamePoint = getGamePointFromSession();
   store.commit("setGamePoint", gamePoint);
   playerPoint.value = store.getters.getGamePoint;
   init();
 });
 
 const init = () => {
+  bettingPoint.value = 0;
   dealerHands.splice(0);
   playerHands.splice(0);
   dealerHands.push(...[deck.pick(), deck.pick()]);
@@ -72,7 +74,6 @@ const init = () => {
 };
 
 const confirmBettingPoint = () => {
-  console.log({ bettingPoint }, bettingPoint.value);
   if (bettingPoint.value <= 0) {
     console.log("ポイントが入力されていません");
     return;
@@ -91,8 +92,8 @@ const hit = () => {
 };
 
 const double = () => {
-  hit(); // 一旦一枚引くようにする
-  isDoublePoint = true;
+  hit();
+  bettingPoint.value *= 2;
 };
 
 const calculateHandTotal = (hands: Card[]) => {
@@ -129,10 +130,10 @@ const judge = async () => {
   }
 
   if (resultValue === "LOSE") {
-    playerPoint.value -= bettingPoint.value * (isDoublePoint ? 2 : 1)
+    playerPoint.value -= bettingPoint.value;
   } else if (resultValue === "WIN") {
-		playerPoint.value += bettingPoint.value * (isDoublePoint ? 2 : 1)
-	}
+    playerPoint.value += bettingPoint.value;
+  }
 
   resultDialog = {
     ...resultAlertProps,
@@ -144,6 +145,7 @@ const judge = async () => {
 const close = () => {
   resultDialog.display = false;
   scene.value = "betting";
+  setGamePointFromSession(playerPoint.value)
   init();
 };
 

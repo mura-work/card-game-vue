@@ -4,15 +4,15 @@ import BlackJackImg from "../assets/images/brack-jack-image.png";
 import { useRouter } from "vue-router";
 import { onMounted } from "vue";
 import { useStore } from "vuex";
+import { getGamePointFromSession, setGamePointFromSession } from "../utils/sessionStorage.ts";
 
 const router = useRouter();
 const store = useStore();
 
 onMounted(() => {
-  const getJsonData = sessionStorage.getItem("game-point");
-  const gamePoint = getJsonData ? JSON.parse(getJsonData) : 1000;
-  store.dispatch('updateGamePoint', gamePoint)
+  const gamePoint = getGamePointFromSession();
   store.commit("setGamePoint", gamePoint);
+  setGamePointFromSession(gamePoint)
 });
 
 const openGame = (path: string) => router.push(path);
