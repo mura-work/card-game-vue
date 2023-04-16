@@ -5,19 +5,22 @@ import { imageUrl } from "../utils/index";
 interface Props {
   playerHands: Card[];
   playerName: String;
+  playerPoint: Number;
 }
-const { playerHands, playerName } = defineProps<Props>();
+const { playerHands, playerName, playerPoint } = defineProps<Props>();
 </script>
 
 <template>
   <div class="mb-4">
-    <h2 class="text-white font-bold text-2xl mb-8">{{ playerName }}</h2>
+    <h2 class="text-white font-bold text-xl mb-4">
+      {{ playerName }}：{{ playerPoint ?? '--' }} pt
+    </h2>
     <div class="w-auto h-auto">
       <template v-for="card in playerHands" :key="card.imageId">
         <v-img
           class="font-bold inline-block mr-8"
-          height="120"
-          width="80"
+          height="140"
+          width="100"
           :src="imageUrl(card.imageId)"
           cover
         />

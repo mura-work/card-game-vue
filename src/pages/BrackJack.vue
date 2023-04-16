@@ -176,7 +176,7 @@ const surrender = () => {
 </script>
 
 <template>
-  <div class="h-screen w-screen bg-green-800 flex justify-center flex-col">
+  <div class="h-screen w-screen bg-green-800 flex justify-between flex-col p-8">
     <div v-if="scene === 'betting'" class="text-center">
       <h2 class="text-white font-bold text-4xl mb-16">Betting</h2>
       <div class="text-white font-bold mb-4 text-center">
@@ -202,16 +202,29 @@ const surrender = () => {
       <span class="text-white font-bold">掛け金を入力してください。</span>
     </div>
     <div
-      class="w-3/5 max-w-3/5 w-auto text-center mb-16"
+      class="w-3/5 max-w-3/5 w-auto text-center"
       v-if="['actions', 'result'].includes(scene)"
     >
       <PlayerHandCard :playerHands="dealerHands" playerName="Dealer" />
     </div>
     <div
+      class="w-3/5 max-w-3/5 w-auto text-center"
+      v-if="['actions', 'result'].includes(scene)"
+    >
+      <div class="flex justify-between">
+        <PlayerHandCard :playerHands="dealerHands" playerName="CPU1" />
+        <PlayerHandCard :playerHands="dealerHands" playerName="CPU2" />
+      </div>
+    </div>
+    <div
       class="max-w-3/5 w-auto w-3/5 text-center"
       v-if="['actions', 'result'].includes(scene)"
     >
-      <PlayerHandCard :playerHands="playerHands" playerName="Me" />
+      <PlayerHandCard
+        :playerHands="playerHands"
+        playerName="Me"
+        :playerPoint="playerPoint"
+      />
       <div v-if="['actions', 'result'].includes(scene)">
         <v-btn @click="surrender()" class="mr-8 bg-red"> surrender </v-btn>
         <v-btn @click="judge()" class="mr-8 bg-yellow">stand</v-btn>
