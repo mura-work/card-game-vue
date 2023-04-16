@@ -9,6 +9,7 @@ import {
   getGamePointFromSession,
   setGamePointFromSession,
 } from "../utils/sessionStorage.ts";
+import PlayerHandCard from "../components/PlayerHandCard.vue";
 
 const CONST_ACTION = {
   SURRENDER: "surrender",
@@ -41,7 +42,7 @@ type ResultType = "win" | "lose" | "draw";
 
 const store = useStore();
 
-let scene = ref<SceneType>("betting");
+let scene = ref<SceneType>("actions");
 let playerPoint = ref<number>(0); // 初期値 ローカルセッションで保持する
 const bettingPoint = ref<number>(0);
 let isDoublePoint = ref<boolean>(false);
@@ -204,35 +205,13 @@ const surrender = () => {
       class="w-3/5 max-w-3/5 w-auto text-center mb-16"
       v-if="['actions', 'result'].includes(scene)"
     >
-      <h2 class="text-white font-bold text-4xl mb-8">Dealer</h2>
-      <div class="w-auto h-auto">
-        <template v-for="card in dealerHands" :key="card.imageId">
-          <v-img
-            class="font-bold inline-block mr-8"
-            height="180"
-            width="120"
-            :src="imageUrl(card.imageId)"
-            cover
-          />
-        </template>
-      </div>
+      <PlayerHandCard :playerHands="dealerHands" playerName="Dealer" />
     </div>
     <div
       class="max-w-3/5 w-auto w-3/5 text-center"
       v-if="['actions', 'result'].includes(scene)"
     >
-      <h2 class="text-white font-bold text-4xl mb-4">Player</h2>
-      <div class="w-auto h-auto mb-8">
-        <template v-for="card in playerHands" :key="card.imageId">
-          <v-img
-            class="font-bold inline-block mr-8"
-            height="180"
-            width="120"
-            :src="imageUrl(card.imageId)"
-            cover
-          />
-        </template>
-      </div>
+      <PlayerHandCard :playerHands="playerHands" playerName="Me" />
       <div v-if="['actions', 'result'].includes(scene)">
         <v-btn @click="surrender()" class="mr-8 bg-red"> surrender </v-btn>
         <v-btn @click="judge()" class="mr-8 bg-yellow">stand</v-btn>
