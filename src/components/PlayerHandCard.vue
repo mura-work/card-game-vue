@@ -11,9 +11,9 @@ const { playerHands, playerName, playerPoint } = defineProps<Props>();
 </script>
 
 <template>
-  <div class="mb-4">
+  <div class="mb-6">
     <h2 class="text-white font-bold text-xl mb-4">
-      {{ playerName }}：{{ playerPoint ?? '--' }} pt
+      {{ playerName }}：{{ playerPoint ?? "--" }} pt
     </h2>
     <div class="w-auto h-auto">
       <template v-for="card in playerHands" :key="card.imageId">

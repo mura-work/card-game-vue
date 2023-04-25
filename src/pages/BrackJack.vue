@@ -43,7 +43,7 @@ type ResultType = "win" | "lose" | "draw";
 const store = useStore();
 
 let scene = ref<SceneType>("actions");
-let playerPoint = ref<number>(0); // 初期値 ローカルセッションで保持する
+let playerPoint = ref<number>(0);
 const bettingPoint = ref<number>(0);
 let isDoublePoint = ref<boolean>(false);
 const dealerHands = reactive<Card[]>([]);
@@ -176,7 +176,7 @@ const surrender = () => {
 </script>
 
 <template>
-  <div class="h-screen w-screen bg-green-800 flex justify-between flex-col p-8">
+  <div class="h-screen w-screen bg-green-800 flex justify-between flex-col p-12">
     <div v-if="scene === 'betting'" class="text-center">
       <h2 class="text-white font-bold text-4xl mb-16">Betting</h2>
       <div class="text-white font-bold mb-4 text-center">
@@ -207,7 +207,7 @@ const surrender = () => {
     >
       <PlayerHandCard :playerHands="dealerHands" playerName="Dealer" />
     </div>
-    <div
+    <!-- <div
       class="w-3/5 max-w-3/5 w-auto text-center"
       v-if="['actions', 'result'].includes(scene)"
     >
@@ -215,7 +215,7 @@ const surrender = () => {
         <PlayerHandCard :playerHands="dealerHands" playerName="CPU1" />
         <PlayerHandCard :playerHands="dealerHands" playerName="CPU2" />
       </div>
-    </div>
+    </div> -->
     <div
       class="max-w-3/5 w-auto w-3/5 text-center"
       v-if="['actions', 'result'].includes(scene)"
