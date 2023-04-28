@@ -11,9 +11,11 @@
   "dependencies": {
     "vue": "^3.2.47",
     "vue-router": "4",
-    "vuetify": "^3.1.4"
+    "vuetify": "^3.1.4",
+    "vuex": "^4.0.2"
   },
   "devDependencies": {
+    "@mdi/js": "^7.2.96",
     "@vitejs/plugin-vue": "^4.1.0",
     "autoprefixer": "^10.4.14",
     "postcss": "^8.4.21",

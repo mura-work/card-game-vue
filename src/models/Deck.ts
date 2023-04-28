@@ -14,7 +14,7 @@ export default class Deck {
       .map((suit, idx) => {
         return [...Array(13)].map((_, i) => {
           const id = idx * 13 + (i + 1);
-          return new Card(suit, String(id), id);
+          return new Card(suit, String(i + 1), id);
         });
       })
       .flat();
