@@ -66,6 +66,7 @@ let alertDialog = reactive({
   text: "",
 });
 const displayHelpActions = ref(false);
+const isPlayerOneTurnEnd = ref(false);
 
 onMounted(() => {
   const gamePoint = getGamePointFromSession();
@@ -101,9 +102,24 @@ const confirmBettingPoint = () => {
   scene.value = "actions";
 };
 
+const sleep = (time) => new Promise((resolve) => setTimeout(resolve, time));
+
 const hit = () => {
   const newCard = deck.pick();
   playerHands.push(newCard);
+  if (!isPlayerOneTurnEnd.value) {
+    isPlayerOneTurnEnd.value = true;
+    // ディーラーの手札が17以上になるように手札を引き続ける
+    const recursionDealerHands = async () => {
+      if (calculateHandTotal(dealerHands) >= 17) {
+        return;
+      }
+      const addedDealerHands = dealerHands.push(deck.pick());
+      await sleep(500);
+      recursionDealerHands();
+    };
+    recursionDealerHands();
+  }
 };
 
 const double = () => {
@@ -176,7 +192,9 @@ const surrender = () => {
 </script>
 
 <template>
-  <div class="h-screen w-screen bg-green-800 flex justify-between flex-col p-12">
+  <div
+    class="h-screen w-screen bg-green-800 flex justify-between flex-col p-12"
+  >
     <div v-if="scene === 'betting'" class="text-center">
       <h2 class="text-white font-bold text-4xl mb-16">Betting</h2>
       <div class="text-white font-bold mb-4 text-center">
@@ -201,11 +219,16 @@ const surrender = () => {
       </div>
       <span class="text-white font-bold">掛け金を入力してください。</span>
     </div>
+    <!-- ディーラーの手札 -->
     <div
       class="w-3/5 max-w-3/5 w-auto text-center"
       v-if="['actions', 'result'].includes(scene)"
     >
-      <PlayerHandCard :playerHands="dealerHands" playerName="Dealer" />
+      <PlayerHandCard
+        :playerHands="dealerHands"
+        playerName="Dealer"
+        :isCardFront="!isPlayerOneTurnEnd"
+      />
     </div>
     <!-- <div
       class="w-3/5 max-w-3/5 w-auto text-center"
@@ -216,6 +239,7 @@ const surrender = () => {
         <PlayerHandCard :playerHands="dealerHands" playerName="CPU2" />
       </div>
     </div> -->
+    <!-- プレイヤーの手札 -->
     <div
       class="max-w-3/5 w-auto w-3/5 text-center"
       v-if="['actions', 'result'].includes(scene)"
@@ -224,6 +248,7 @@ const surrender = () => {
         :playerHands="playerHands"
         playerName="Me"
         :playerPoint="playerPoint"
+        :isCardFront="false"
       />
       <div v-if="['actions', 'result'].includes(scene)">
         <v-btn @click="surrender()" class="mr-8 bg-red"> surrender </v-btn>
