@@ -102,10 +102,24 @@ const confirmBettingPoint = () => {
   scene.value = "actions";
 };
 
+const sleep = (time) => new Promise((resolve) => setTimeout(resolve, time));
+
 const hit = () => {
   const newCard = deck.pick();
   playerHands.push(newCard);
-  isPlayerOneTurnEnd.value = true
+  if (!isPlayerOneTurnEnd.value) {
+    isPlayerOneTurnEnd.value = true;
+    // ディーラーの手札が17以上になるように手札を引き続ける
+    const recursionDealerHands = async () => {
+      if (calculateHandTotal(dealerHands) >= 17) {
+        return;
+      }
+      const addedDealerHands = dealerHands.push(deck.pick());
+      await sleep(500);
+      recursionDealerHands();
+    };
+    recursionDealerHands();
+  }
 };
 
 const double = () => {
