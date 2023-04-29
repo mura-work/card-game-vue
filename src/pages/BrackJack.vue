@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import Deck from '../models/Deck';
-import { onMounted, reactive, ref } from 'vue';
+import { onMounted, reactive, ref, computed } from 'vue';
 import { mdiInformation } from '@mdi/js';
 import Card from '../models/Card';
 import { useStore } from 'vuex';
@@ -104,7 +104,7 @@ const hit = async () => {
     isPlayerOneTurnEnd.value = true;
     // ディーラーの手札が17以上になるように手札を引き続ける
     const recursionDealerHands = async () => {
-      if (calculateHandTotal(dealerHands) >= 17) {
+      if (calculateHandTotal(dealerHands as Card[]) >= 17) {
         return;
       }
       dealerHands.push(deck.pick());
@@ -113,7 +113,7 @@ const hit = async () => {
       return;
     };
     await recursionDealerHands();
-    if (calculateHandTotal(dealerHands) > 21) {
+    if (calculateHandTotal(dealerHands as Card[]) > 21) {
       judge(); // ディーラーが21以上であればゲーム終了
     }
   }
@@ -135,7 +135,9 @@ const calculateHandTotal = (hands: Card[]) => {
 const judge = async () => {
   isPlayerOneTurnEnd.value = true;
   const [dealerScore, playerScore] = await Promise.all(
-    [dealerHands, playerHands].map((hands) => calculateHandTotal(hands))
+    [dealerHands, playerHands].map((hands) =>
+      calculateHandTotal(hands as Card[])
+    )
   );
   let resultAlertProps = null;
   let resultValue: 'WIN' | 'LOSE' | 'DRAW' = 'DRAW';
@@ -158,8 +160,8 @@ const judge = async () => {
 
   if (
     resultValue !== 'DRAW' &&
-    (calculateHandTotal(dealerHands) === 21 ||
-      calculateHandTotal(playerHands) === 21)
+    (calculateHandTotal(dealerHands as Card[]) === 21 ||
+      calculateHandTotal(playerHands as Card[]) === 21)
   ) {
     bettingPoint.value *= 2;
   }
@@ -194,6 +196,9 @@ const surrender = () => {
   scene.value = 'result';
   playerPoint.value -= bettingPoint.value;
 };
+
+const dealerHandsProps = computed(() => dealerHands as Card[]);
+const playerHandsProps = computed(() => playerHands as Card[]);
 </script>
 
 <template>
@@ -230,7 +235,7 @@ const surrender = () => {
       class="w-3/5 max-w-3/5 w-auto text-center"
     >
       <PlayerHandCard
-        :player-hands="dealerHands"
+        :player-hands="dealerHandsProps"
         player-name="Dealer"
         :is-card-front="!isPlayerOneTurnEnd"
       />
@@ -240,7 +245,7 @@ const surrender = () => {
       class="max-w-3/5 w-auto w-3/5 text-center"
     >
       <PlayerHandCard
-        :player-hands="playerHands"
+        :player-hands="playerHandsProps"
         player-name="Me"
         :player-point="playerPoint"
         :is-card-front="false"
