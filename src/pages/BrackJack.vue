@@ -1,52 +1,43 @@
 <script setup lang="ts">
-import Deck from "../models/Deck";
-import { onMounted, reactive, ref, computed } from "vue";
-import { imageUrl } from "../utils/index";
-import { mdiInformation } from "@mdi/js";
-import Card from "../models/Card";
-import { useStore } from "vuex";
+import Deck from '../models/Deck';
+import { onMounted, reactive, ref } from 'vue';
+import { mdiInformation } from '@mdi/js';
+import Card from '../models/Card';
+import { useStore } from 'vuex';
 import {
   getGamePointFromSession,
   setGamePointFromSession,
-} from "../utils/sessionStorage";
-import PlayerHandCard from "../components/PlayerHandCard.vue";
-
-const CONST_ACTION = {
-  SURRENDER: "surrender",
-  STAND: "stand",
-  HIT: "hit",
-  DOUBLE: "double",
-};
+} from '../utils/sessionStorage';
+import PlayerHandCard from '../components/PlayerHandCard.vue';
 
 const RESULT_ALERT_PROPS = {
   WIN: {
-    title: "YOU WIN!!",
-    text: "point up",
-    message: "おめでとうございます！！",
+    title: 'YOU WIN!!',
+    text: 'point up',
+    message: 'おめでとうございます！！',
   },
   LOSE: {
-    title: "YOU LOSE",
-    text: "BAD LUCK..........",
-    message: "残念でした！！！",
+    title: 'YOU LOSE',
+    text: 'BAD LUCK..........',
+    message: '残念でした！！！',
   },
   DRAW: {
-    title: "DRAW",
-    text: "Good luck next time",
-    message: "引き分け！！もっと攻めよう！！",
+    title: 'DRAW',
+    text: 'Good luck next time',
+    message: '引き分け！！もっと攻めよう！！',
   },
 };
 
-type SceneType = "betting" | "actions" | "result";
-type ActionType = "surrender" | "stand" | "hit" | "double";
-type ResultType = "win" | "lose" | "draw";
+type SceneType = 'betting' | 'actions' | 'result';
+// type ActionType = 'surrender' | 'stand' | 'hit' | 'double';
+// type ResultType = 'win' | 'lose' | 'draw';
 
 const store = useStore();
 
-let scene = ref<SceneType>("betting");
-let playerPoint = ref<number>(0);
+const scene = ref<SceneType>('betting');
+const playerPoint = ref<number>(0);
 const bettingPoint = ref<number>(0);
-let isDoublePoint = ref<boolean>(false);
-const dealerHands: Card[] = reactive<Card[]>([]);
+const dealerHands = reactive<Card[]>([]);
 const playerHands = reactive<Card[]>([]);
 const deck = reactive<Deck>(new Deck());
 let resultDialog = reactive<{
@@ -56,21 +47,21 @@ let resultDialog = reactive<{
   message?: string;
 }>({
   display: false,
-  title: "",
-  text: "",
-  message: "",
+  title: '',
+  text: '',
+  message: '',
 });
-let alertDialog = reactive({
+const alertDialog = reactive({
   display: false,
-  title: "",
-  text: "",
+  title: '',
+  text: '',
 });
 const displayHelpActions = ref(false);
 const isPlayerOneTurnEnd = ref(false);
 
 onMounted(() => {
   const gamePoint = getGamePointFromSession();
-  store.commit("setGamePoint", gamePoint);
+  store.commit('setGamePoint', gamePoint);
   playerPoint.value = store.getters.getGamePoint;
   init();
 });
@@ -80,8 +71,7 @@ const init = () => {
   bettingPoint.value = 0;
   dealerHands.splice(0);
   playerHands.splice(0);
-  const hands: Card[] = [deck.pick(), deck.pick()]
-  dealerHands.push(hands);
+  dealerHands.push(deck.pick(), deck.pick());
   playerHands.push(deck.pick(), deck.pick());
 };
 
@@ -89,22 +79,23 @@ const confirmBettingPoint = () => {
   if (bettingPoint.value <= 0) {
     Object.assign(alertDialog, {
       display: true,
-      title: "警告",
-      text: "ポイントが入力されていません。入力をやり直してください",
+      title: '警告',
+      text: 'ポイントが入力されていません。入力をやり直してください',
     });
     return;
   } else if (bettingPoint.value > playerPoint.value) {
     Object.assign(alertDialog, {
       display: true,
-      title: "警告",
-      text: "所持ポイントよりも入力ポイントの方が多いです。所持ポイントを上回らないようにしてください",
+      title: '警告',
+      text: '所持ポイントよりも入力ポイントの方が多いです。所持ポイントを上回らないようにしてください',
     });
     return;
   }
-  scene.value = "actions";
+  scene.value = 'actions';
 };
 
-const sleep = (time: number) => new Promise((resolve) => setTimeout(resolve, time));
+const sleep = (time: number) =>
+  new Promise((resolve) => setTimeout(resolve, time));
 
 const hit = async () => {
   const newCard = deck.pick();
@@ -116,10 +107,10 @@ const hit = async () => {
       if (calculateHandTotal(dealerHands) >= 17) {
         return;
       }
-      const addedDealerHands = dealerHands.push(deck.pick());
+      dealerHands.push(deck.pick());
       await sleep(500);
       recursionDealerHands();
-      return
+      return;
     };
     await recursionDealerHands();
     if (calculateHandTotal(dealerHands) > 21) {
@@ -144,40 +135,38 @@ const calculateHandTotal = (hands: Card[]) => {
 const judge = async () => {
   isPlayerOneTurnEnd.value = true;
   const [dealerScore, playerScore] = await Promise.all(
-    [dealerHands, playerHands].map((hands) =>
-      calculateHandTotal(hands)
-    )
+    [dealerHands, playerHands].map((hands) => calculateHandTotal(hands))
   );
   let resultAlertProps = null;
-  let resultValue: "WIN" | "LOSE" | "DRAW" = "DRAW";
+  let resultValue: 'WIN' | 'LOSE' | 'DRAW' = 'DRAW';
   if (playerScore > 21) {
     resultAlertProps = RESULT_ALERT_PROPS.LOSE;
-    resultValue = "LOSE";
+    resultValue = 'LOSE';
   } else if (dealerScore > 21) {
     resultAlertProps = RESULT_ALERT_PROPS.WIN;
-    resultValue = "WIN";
+    resultValue = 'WIN';
   } else if (dealerScore === playerScore) {
     resultAlertProps = RESULT_ALERT_PROPS.DRAW;
-    resultValue = "DRAW";
+    resultValue = 'DRAW';
   } else if (dealerScore > playerScore) {
     resultAlertProps = RESULT_ALERT_PROPS.LOSE;
-    resultValue = "LOSE";
+    resultValue = 'LOSE';
   } else {
     resultAlertProps = RESULT_ALERT_PROPS.WIN;
-    resultValue = "WIN";
+    resultValue = 'WIN';
   }
 
   if (
-    resultValue !== "DRAW" &&
+    resultValue !== 'DRAW' &&
     (calculateHandTotal(dealerHands) === 21 ||
       calculateHandTotal(playerHands) === 21)
   ) {
     bettingPoint.value *= 2;
   }
 
-  if (resultValue === "LOSE") {
+  if (resultValue === 'LOSE') {
     playerPoint.value -= bettingPoint.value;
-  } else if (resultValue === "WIN") {
+  } else if (resultValue === 'WIN') {
     playerPoint.value +=
       Math.floor(bettingPoint.value * 1.5) - bettingPoint.value;
   }
@@ -186,12 +175,12 @@ const judge = async () => {
     ...resultAlertProps,
     display: true,
   };
-  scene.value = "result";
+  scene.value = 'result';
 };
 
 const close = () => {
   resultDialog.display = false;
-  scene.value = "betting";
+  scene.value = 'betting';
   setGamePointFromSession(playerPoint.value);
   init();
 };
@@ -199,10 +188,10 @@ const close = () => {
 const surrender = () => {
   resultDialog = {
     display: true,
-    title: "降伏",
-    text: "あなたは負けを認めました。",
+    title: '降伏',
+    text: 'あなたは負けを認めました。',
   };
-  scene.value = "result";
+  scene.value = 'result';
   playerPoint.value -= bettingPoint.value;
 };
 </script>
@@ -225,10 +214,10 @@ const surrender = () => {
           :max="playerPoint"
         />
         <v-btn
-          @click="confirmBettingPoint"
           :disabled="bettingPoint <= 0"
           class="ml-4 bg-blue"
           size="small"
+          @click="confirmBettingPoint"
         >
           確定
         </v-btn>
@@ -237,41 +226,41 @@ const surrender = () => {
     </div>
     <!-- ディーラーの手札 -->
     <div
-      class="w-3/5 max-w-3/5 w-auto text-center"
       v-if="['actions', 'result'].includes(scene)"
+      class="w-3/5 max-w-3/5 w-auto text-center"
     >
       <PlayerHandCard
-        :playerHands="dealerHands"
-        playerName="Dealer"
-        :isCardFront="!isPlayerOneTurnEnd"
+        :player-hands="dealerHands"
+        player-name="Dealer"
+        :is-card-front="!isPlayerOneTurnEnd"
       />
     </div>
     <div
-      class="max-w-3/5 w-auto w-3/5 text-center"
       v-if="['actions', 'result'].includes(scene)"
+      class="max-w-3/5 w-auto w-3/5 text-center"
     >
       <PlayerHandCard
-        :playerHands="playerHands"
-        playerName="Me"
-        :playerPoint="playerPoint"
-        :isCardFront="false"
+        :player-hands="playerHands"
+        player-name="Me"
+        :player-point="playerPoint"
+        :is-card-front="false"
       />
       <div v-if="['actions', 'result'].includes(scene)">
-        <v-btn @click="surrender()" class="mr-8 bg-red"> surrender </v-btn>
-        <v-btn @click="judge()" class="mr-8 bg-yellow">stand</v-btn>
-        <v-btn @click="hit()" class="mr-8 bg-green"> hit </v-btn>
-        <v-btn @click="double()" class="mr-8 bg-blue"> double </v-btn>
+        <v-btn class="mr-8 bg-red" @click="surrender()"> surrender </v-btn>
+        <v-btn class="mr-8 bg-yellow" @click="judge()"> stand </v-btn>
+        <v-btn class="mr-8 bg-green" @click="hit()"> hit </v-btn>
+        <v-btn class="mr-8 bg-blue" @click="double()"> double </v-btn>
         <v-dialog v-model="displayHelpActions" width="auto">
-          <template v-slot:activator="{ props }">
+          <template #activator="{ props }">
             <v-icon
               :icon="mdiInformation"
               v-bind="props"
               size="large"
               color="white"
-            ></v-icon>
+            />
           </template>
           <v-card max-width="800px">
-            <v-card-title class="font-bold">アクションの説明</v-card-title>
+            <v-card-title class="font-bold"> アクションの説明 </v-card-title>
             <v-card-text class="leading-3">
               <div class="mb-4">
                 surrender：最初に配られた

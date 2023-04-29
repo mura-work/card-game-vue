@@ -1,16 +1,16 @@
-import { createRouter, createWebHistory } from "vue-router";
-import BrackJackVue from "../pages/BrackJack.vue";
-import HomePage from "../pages/Home.vue";
+import { createRouter, createWebHistory } from 'vue-router';
+import BrackJackVue from '../pages/BrackJack.vue';
+import TopPage from '../pages/TopPage.vue';
 
 const routes = [
   {
-    path: "/",
-    name: "home",
-    component: HomePage,
+    path: '/',
+    name: 'home',
+    component: TopPage,
   },
   {
-    path: "/brack-jack",
-    name: "brackJacePage",
+    path: '/brack-jack',
+    name: 'brackJacePage',
     component: BrackJackVue,
   },
 ];

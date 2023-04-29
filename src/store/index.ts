@@ -1,8 +1,8 @@
-import { createStore } from "vuex";
+import { createStore } from 'vuex';
 
 type State = {
-	gamePoint: number,
-}
+  gamePoint: number;
+};
 
 const store = createStore<State>({
   state: {

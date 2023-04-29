@@ -1,18 +1,21 @@
 <script setup lang="ts">
-import ComingSoonImg from "../assets/images/coming-soon.png";
-import BlackJackImg from "../assets/images/brack-jack-image.png";
-import { useRouter } from "vue-router";
-import { onMounted } from "vue";
-import { useStore } from "vuex";
-import { getGamePointFromSession, setGamePointFromSession } from "../utils/sessionStorage";
+import ComingSoonImg from '../assets/images/coming-soon.png';
+import BlackJackImg from '../assets/images/brack-jack-image.png';
+import { useRouter } from 'vue-router';
+import { onMounted } from 'vue';
+import { useStore } from 'vuex';
+import {
+  getGamePointFromSession,
+  setGamePointFromSession,
+} from '../utils/sessionStorage';
 
 const router = useRouter();
 const store = useStore();
 
 onMounted(() => {
   const gamePoint = getGamePointFromSession();
-  store.commit("setGamePoint", gamePoint);
-  setGamePointFromSession(gamePoint)
+  store.commit('setGamePoint', gamePoint);
+  setGamePointFromSession(gamePoint);
 });
 
 const openGame = (path: string) => router.push(path);

@@ -1,5 +1,5 @@
 export const getGamePointFromSession = () => {
-  const gamePoint = sessionStorage.getItem("gamePoint");
+  const gamePoint = sessionStorage.getItem('gamePoint');
   if (gamePoint) {
     return Number(gamePoint);
   } else {
@@ -8,5 +8,5 @@ export const getGamePointFromSession = () => {
 };
 
 export const setGamePointFromSession = (gamePoint: number) => {
-  sessionStorage.setItem("gamePoint", JSON.stringify(gamePoint));
-}
+  sessionStorage.setItem('gamePoint', JSON.stringify(gamePoint));
+};

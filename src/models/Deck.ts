@@ -1,4 +1,4 @@
-import Card from "./Card";
+import Card from './Card';
 
 export default class Deck {
   private cards: Card[];
@@ -9,7 +9,7 @@ export default class Deck {
 
   // デッキの生成を行う
   init() {
-    const suits = ["Hearts", "Diamonds", "Clovers", "Spades"];
+    const suits = ['Hearts', 'Diamonds', 'Clovers', 'Spades'];
     this.cards = suits
       .map((suit, idx) => {
         return [...Array(13)].map((_, i) => {
@@ -18,13 +18,13 @@ export default class Deck {
         });
       })
       .flat();
-		this.shuffle()
+    this.shuffle();
   }
 
   shuffle() {
     for (let i = this.cards.length - 1; 0 < i; i--) {
-      let r = Math.floor(Math.random() * (i + 1));
-      let temp = this.cards[i];
+      const r = Math.floor(Math.random() * (i + 1));
+      const temp = this.cards[i];
       this.cards[i] = this.cards[r];
       this.cards[r] = temp;
     }

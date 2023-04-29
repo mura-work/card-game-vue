@@ -6,7 +6,7 @@ export default class Card {
   constructor(suit: string, rank: string, imageId: number) {
     this._suit = suit;
     this._rank = rank;
-		this._imageId = imageId;
+    this._imageId = imageId;
   }
 
   get suit() {
@@ -17,14 +17,14 @@ export default class Card {
     return this._rank;
   }
 
-	/**
-	 * カードの画像を表示する際に使用
-	 * @readonly
-	 * @memberof Card
-	 */
-	get imageId() {
-		return this._imageId;
-	}
+  /**
+   * カードの画像を表示する際に使用
+   * @readonly
+   * @memberof Card
+   */
+  get imageId() {
+    return this._imageId;
+  }
 
   getRankNumber(): number {
     return Number(this._rank);
