@@ -104,7 +104,7 @@ const confirmBettingPoint = () => {
 
 const sleep = (time) => new Promise((resolve) => setTimeout(resolve, time));
 
-const hit = () => {
+const hit = async () => {
   const newCard = deck.pick();
   playerHands.push(newCard);
   if (!isPlayerOneTurnEnd.value) {
@@ -118,7 +118,10 @@ const hit = () => {
       await sleep(500);
       recursionDealerHands();
     };
-    recursionDealerHands();
+    await recursionDealerHands();
+    if (calculateHandTotal(dealerHands) > 21) {
+      judge() // ディーラーが21以上であればゲーム終了
+    }
   }
 };
 
