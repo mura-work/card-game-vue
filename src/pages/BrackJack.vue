@@ -120,7 +120,7 @@ const hit = async () => {
     };
     await recursionDealerHands();
     if (calculateHandTotal(dealerHands) > 21) {
-      judge() // ディーラーが21以上であればゲーム終了
+      judge(); // ディーラーが21以上であればゲーム終了
     }
   }
 };
@@ -145,7 +145,7 @@ const judge = async () => {
     )
   );
   let resultAlertProps = null;
-  let resultValue: "WIN" | "LOSE" | "DRAW" = "WIN"; // 一旦初期値WIN
+  let resultValue: "WIN" | "LOSE" | "DRAW" = "DRAW";
   if (playerScore > 21) {
     resultAlertProps = RESULT_ALERT_PROPS.LOSE;
     resultValue = "LOSE";
@@ -163,10 +163,19 @@ const judge = async () => {
     resultValue = "WIN";
   }
 
+  if (
+    resultValue !== "DRAW" &&
+    (calculateHandTotal(dealerHands) === 21 ||
+      calculateHandTotal(playerHands) === 21)
+  ) {
+    console.log("ブラックジャック");
+    bettingPoint.value *= 2;
+  }
+
   if (resultValue === "LOSE") {
     playerPoint.value -= bettingPoint.value;
   } else if (resultValue === "WIN") {
-    playerPoint.value += bettingPoint.value;
+    playerPoint.value += bettingPoint.value * 1.5;
   }
 
   resultDialog = {
