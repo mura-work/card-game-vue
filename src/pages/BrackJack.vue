@@ -42,7 +42,7 @@ type ResultType = "win" | "lose" | "draw";
 
 const store = useStore();
 
-let scene = ref<SceneType>("actions");
+let scene = ref<SceneType>("betting");
 let playerPoint = ref<number>(0);
 const bettingPoint = ref<number>(0);
 let isDoublePoint = ref<boolean>(false);
@@ -76,6 +76,7 @@ onMounted(() => {
 });
 
 const init = () => {
+  isPlayerOneTurnEnd.value = false;
   bettingPoint.value = 0;
   dealerHands.splice(0);
   playerHands.splice(0);
@@ -116,7 +117,7 @@ const hit = async () => {
       }
       const addedDealerHands = dealerHands.push(deck.pick());
       await sleep(500);
-      recursionDealerHands();
+      return recursionDealerHands();
     };
     await recursionDealerHands();
     if (calculateHandTotal(dealerHands) > 21) {
@@ -139,6 +140,7 @@ const calculateHandTotal = (hands: Card[]) => {
 };
 
 const judge = async () => {
+  isPlayerOneTurnEnd.value = true;
   const [dealerScore, playerScore] = await Promise.all(
     [dealerHands, playerHands].map((hands) =>
       calculateHandTotal(hands as Card[])
@@ -168,14 +170,14 @@ const judge = async () => {
     (calculateHandTotal(dealerHands) === 21 ||
       calculateHandTotal(playerHands) === 21)
   ) {
-    console.log("ブラックジャック");
     bettingPoint.value *= 2;
   }
 
   if (resultValue === "LOSE") {
     playerPoint.value -= bettingPoint.value;
   } else if (resultValue === "WIN") {
-    playerPoint.value += bettingPoint.value * 1.5;
+    playerPoint.value +=
+      Math.floor(bettingPoint.value * 1.5) - bettingPoint.value;
   }
 
   resultDialog = {
