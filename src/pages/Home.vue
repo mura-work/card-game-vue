@@ -4,7 +4,7 @@ import BlackJackImg from "../assets/images/brack-jack-image.png";
 import { useRouter } from "vue-router";
 import { onMounted } from "vue";
 import { useStore } from "vuex";
-import { getGamePointFromSession, setGamePointFromSession } from "../utils/sessionStorage.ts";
+import { getGamePointFromSession, setGamePointFromSession } from "../utils/sessionStorage";
 
 const router = useRouter();
 const store = useStore();

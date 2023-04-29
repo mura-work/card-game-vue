@@ -8,7 +8,7 @@ import { useStore } from "vuex";
 import {
   getGamePointFromSession,
   setGamePointFromSession,
-} from "../utils/sessionStorage.ts";
+} from "../utils/sessionStorage";
 import PlayerHandCard from "../components/PlayerHandCard.vue";
 
 const CONST_ACTION = {
@@ -46,7 +46,7 @@ let scene = ref<SceneType>("betting");
 let playerPoint = ref<number>(0);
 const bettingPoint = ref<number>(0);
 let isDoublePoint = ref<boolean>(false);
-const dealerHands = reactive<Card[]>([]);
+const dealerHands: Card[] = reactive<Card[]>([]);
 const playerHands = reactive<Card[]>([]);
 const deck = reactive<Deck>(new Deck());
 let resultDialog = reactive<{
@@ -80,8 +80,9 @@ const init = () => {
   bettingPoint.value = 0;
   dealerHands.splice(0);
   playerHands.splice(0);
-  dealerHands.push(...[deck.pick(), deck.pick()]);
-  playerHands.push(...[deck.pick(), deck.pick()]);
+  const hands: Card[] = [deck.pick(), deck.pick()]
+  dealerHands.push(hands);
+  playerHands.push(deck.pick(), deck.pick());
 };
 
 const confirmBettingPoint = () => {
@@ -103,7 +104,7 @@ const confirmBettingPoint = () => {
   scene.value = "actions";
 };
 
-const sleep = (time) => new Promise((resolve) => setTimeout(resolve, time));
+const sleep = (time: number) => new Promise((resolve) => setTimeout(resolve, time));
 
 const hit = async () => {
   const newCard = deck.pick();
@@ -117,7 +118,8 @@ const hit = async () => {
       }
       const addedDealerHands = dealerHands.push(deck.pick());
       await sleep(500);
-      return recursionDealerHands();
+      recursionDealerHands();
+      return
     };
     await recursionDealerHands();
     if (calculateHandTotal(dealerHands) > 21) {
@@ -143,7 +145,7 @@ const judge = async () => {
   isPlayerOneTurnEnd.value = true;
   const [dealerScore, playerScore] = await Promise.all(
     [dealerHands, playerHands].map((hands) =>
-      calculateHandTotal(hands as Card[])
+      calculateHandTotal(hands)
     )
   );
   let resultAlertProps = null;
@@ -244,16 +246,6 @@ const surrender = () => {
         :isCardFront="!isPlayerOneTurnEnd"
       />
     </div>
-    <!-- <div
-      class="w-3/5 max-w-3/5 w-auto text-center"
-      v-if="['actions', 'result'].includes(scene)"
-    >
-      <div class="flex justify-between">
-        <PlayerHandCard :playerHands="dealerHands" playerName="CPU1" />
-        <PlayerHandCard :playerHands="dealerHands" playerName="CPU2" />
-      </div>
-    </div> -->
-    <!-- プレイヤーの手札 -->
     <div
       class="max-w-3/5 w-auto w-3/5 text-center"
       v-if="['actions', 'result'].includes(scene)"

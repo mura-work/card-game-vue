@@ -3,24 +3,22 @@ import Card from "../models/Card";
 import { imageUrl } from "../utils/index";
 import CardFront from "../assets/images/cards/torannpu-omote.png";
 
-const { playerHands, playerName, playerPoint, isCardFront } = defineProps({
-  playerHands: {
-    type: Array,
-    default: () => [],
-  },
-  playerName: {
-    type: String,
-    default: '',
-  },
-  playerPoint: {
-    type: Number,
-    default: 0,
-  },
-  isCardFront: {
-    type: Boolean,
-    default: false,
-  },
-});
+interface Props {
+  playerHands: Card[];
+  playerName: string;
+  playerPoint?: number;
+  isCardFront?: boolean;
+}
+
+const { playerHands, playerName, playerPoint, isCardFront } = withDefaults(
+  defineProps<Props>(),
+  {
+    playerName: "",
+    playerPoint: 0,
+    isCardFront: false,
+  }
+);
+console.log({ playerHands, playerName, playerPoint, isCardFront });
 </script>
 
 <template>
