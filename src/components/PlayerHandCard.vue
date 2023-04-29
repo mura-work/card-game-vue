@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import Card from '../models/Card';
-import { imageUrl } from '../utils/index';
+import { cardImageList } from '../utils/image-utils/index';
 import CardFront from '../assets/images/cards/torannpu-omote.png';
 
 interface Props {
@@ -15,6 +15,10 @@ const props = withDefaults(defineProps<Props>(), {
   playerPoint: 0,
   isCardFront: false,
 });
+
+const getCardImage = (imageId: number) => {
+  return cardImageList[imageId];
+};
 </script>
 
 <template>
@@ -37,7 +41,7 @@ const props = withDefaults(defineProps<Props>(), {
           class="font-bold inline-block mr-8"
           height="140"
           width="100"
-          :src="imageUrl(card.imageId)"
+          :src="getCardImage(card.imageId)"
           cover
         />
       </template>

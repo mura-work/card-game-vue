@@ -66,6 +66,15 @@ onMounted(() => {
   init();
 });
 
+const dealerHandsProps = computed({
+  get: () => dealerHands as Card[],
+  set: (cards) => dealerHands.push(...cards),
+});
+const playerHandsProps = computed({
+  get: () => playerHands as Card[],
+  set: (cards) => playerHands.push(...cards),
+});
+
 const init = () => {
   isPlayerOneTurnEnd.value = false;
   bettingPoint.value = 0;
@@ -196,9 +205,6 @@ const surrender = () => {
   scene.value = 'result';
   playerPoint.value -= bettingPoint.value;
 };
-
-const dealerHandsProps = computed(() => dealerHands as Card[]);
-const playerHandsProps = computed(() => playerHands as Card[]);
 </script>
 
 <template>
