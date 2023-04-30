@@ -52,13 +52,18 @@ import SampleCard51 from '../../assets/images/cards/torannpu-illust51.png';
 import SampleCard52 from '../../assets/images/cards/torannpu-illust52.png';
 
 export const initializeCardImages = (): Record<string, HTMLImageElement> => {
+  const promises = Object.values(cardImageList).map((url) => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = () => reject(new Error(`Failed to load image ${url}`));
+      img.src = url;
+    });
+  });
+
   const imageCache: Record<string, HTMLImageElement> = {};
-  Object.entries(cardImageList).forEach(([key, value]) => {
-    const img = new Image();
-    img.src = value;
-    img.onload = () => {
-      imageCache[key] = img;
-    };
+  Promise.all(promises).then((images) => {
+    images.forEach((img, i) => (imageCache[i] = img as HTMLImageElement));
   });
   return imageCache;
 };
