@@ -51,7 +51,19 @@ import SampleCard50 from '../../assets/images/cards/torannpu-illust50.png';
 import SampleCard51 from '../../assets/images/cards/torannpu-illust51.png';
 import SampleCard52 from '../../assets/images/cards/torannpu-illust52.png';
 
-export const cardImageList: Record<number, string> = {
+export const initializeCardImages = (): Record<string, HTMLImageElement> => {
+  const imageCache: Record<string, HTMLImageElement> = {};
+  Object.entries(cardImageList).forEach(([key, value]) => {
+    const img = new Image();
+    img.src = value;
+    img.onload = () => {
+      imageCache[key] = img;
+    };
+  });
+  return imageCache;
+};
+
+const cardImageList: Record<number, string> = {
   1: SampleCard1,
   2: SampleCard2,
   3: SampleCard3,
