@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import Card from '../models/Card';
-import { cardImageList } from '../utils/image-utils/index';
 import CardFront from '../assets/images/cards/torannpu-omote.png';
+import { useStore } from 'vuex';
 
 interface Props {
   readonly playerHands: Card[];
@@ -10,6 +10,9 @@ interface Props {
   readonly isCardFront?: boolean;
 }
 
+const store = useStore();
+const cardImageList = store.getters.getCardImageList;
+
 const props = withDefaults(defineProps<Props>(), {
   playerName: '',
   playerPoint: 0,
@@ -17,7 +20,7 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const getCardImage = (imageId: number) => {
-  return cardImageList[imageId];
+  return cardImageList[String(imageId)];
 };
 </script>
 
