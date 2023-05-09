@@ -1,9 +1,14 @@
-import Card from '../models/Card';
+export type HandType = {
+  suit: string;
+  rank: string;
+};
 
 export type BlackJackHistoryType = {
   result: string;
-  playerHands: Card[];
-  dealerHands: Card[];
+  playerHands: HandType[];
+  dealerHands: HandType[];
   playingDateTime: Date;
   userId: number;
+  totalPoint: number;
+  pointDifference: number;
 };
