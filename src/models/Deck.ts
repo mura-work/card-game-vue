@@ -9,7 +9,7 @@ export default class Deck {
 
   // デッキの生成を行う
   init() {
-    const suits = ['Hearts', 'Diamonds', 'Clovers', 'Spades'];
+    const suits = ['Spades', 'Clovers', 'Diamonds', 'Hearts'];
     this.cards = suits
       .map((suit, idx) => {
         return [...Array(13)].map((_, i) => {

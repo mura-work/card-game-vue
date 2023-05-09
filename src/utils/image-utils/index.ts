@@ -63,7 +63,7 @@ export const initializeCardImages = (): Record<string, HTMLImageElement> => {
 
   const imageCache: Record<string, HTMLImageElement> = {};
   Promise.all(promises).then((images) => {
-    images.forEach((img, i) => (imageCache[i] = img as HTMLImageElement));
+    images.forEach((img, i) => (imageCache[++i] = img as HTMLImageElement));
   });
   return imageCache;
 };

@@ -11,7 +11,6 @@ const apiClient = {
 export const fetchBlackJackHistory = async () => {
   const histories =
     await apiClient.blackJackHistory.v1.black_jack_histories.get();
-  console.log({ histories });
   return histories;
 };
 

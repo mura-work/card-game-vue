@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import BrackJackVue from '../pages/BrackJack.vue';
+import BlackJackVue from '../pages/BlackJack.vue';
 import TopPage from '../pages/TopPage.vue';
 
 const routes = [
@@ -9,9 +9,9 @@ const routes = [
     component: TopPage,
   },
   {
-    path: '/brack-jack',
-    name: 'brackJacePage',
-    component: BrackJackVue,
+    path: '/black-jack',
+    name: 'blackJackPage',
+    component: BlackJackVue,
   },
 ];
 
