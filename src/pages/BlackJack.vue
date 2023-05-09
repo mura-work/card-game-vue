@@ -139,6 +139,7 @@ const double = () => {
 };
 
 const calculateHandTotal = (hands: Card[]) => {
+  console.log({ hands });
   return hands.reduce((prev, cur) => {
     const rank = cur.getRankNumber();
     const score = rank > 10 ? 10 : rank; // 11以上は10に揃える
@@ -180,12 +181,13 @@ const judge = async () => {
     bettingPoint.value *= 2;
   }
 
+  let differenceValue = 0;
   if (resultValue === 'LOSE') {
-    playerPoint.value -= bettingPoint.value;
+    differenceValue = -bettingPoint.value;
   } else if (resultValue === 'WIN') {
-    playerPoint.value +=
-      Math.floor(bettingPoint.value * 1.5) - bettingPoint.value;
+    differenceValue = Math.floor(bettingPoint.value * 1.5) - bettingPoint.value;
   }
+  playerPoint.value += differenceValue;
 
   resultDialog = {
     ...resultAlertProps,
@@ -220,7 +222,7 @@ const surrender = () => {
     'LOSE',
     playerHands as Card[],
     dealerHands as Card[],
-    bettingPoint.value
+    -bettingPoint.value
   );
 };
 </script>
