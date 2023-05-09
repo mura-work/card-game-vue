@@ -196,7 +196,8 @@ const judge = async () => {
   saveBlackJackHistory(
     resultValue,
     playerHands as Card[],
-    dealerHands as Card[]
+    dealerHands as Card[],
+    bettingPoint.value
   );
 };
 
@@ -215,6 +216,12 @@ const surrender = () => {
   };
   scene.value = 'result';
   playerPoint.value -= bettingPoint.value;
+  saveBlackJackHistory(
+    'LOSE',
+    playerHands as Card[],
+    dealerHands as Card[],
+    bettingPoint.value
+  );
 };
 </script>
 
