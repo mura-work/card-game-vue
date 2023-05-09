@@ -9,6 +9,10 @@ import {
   setGamePointFromSession,
 } from '../utils/sessionStorage';
 import PlayerHandCard from '../components/PlayerHandCard.vue';
+import {
+  saveBlackJackHistory,
+  fetchBlackJackHistory,
+} from '../services/BlackJackHistoryService';
 
 const RESULT_ALERT_PROPS = {
   WIN: {
@@ -60,6 +64,7 @@ const displayHelpActions = ref(false);
 const isPlayerOneTurnEnd = ref(false);
 
 onMounted(() => {
+  fetchBlackJackHistory();
   const gamePoint = getGamePointFromSession();
   store.commit('setGamePoint', gamePoint);
   playerPoint.value = store.getters.getGamePoint;
@@ -187,6 +192,13 @@ const judge = async () => {
     display: true,
   };
   scene.value = 'result';
+
+  saveBlackJackHistory(
+    resultValue,
+    playerHands as Card[],
+    dealerHands as Card[],
+    bettingPoint.value
+  );
 };
 
 const close = () => {
@@ -204,6 +216,12 @@ const surrender = () => {
   };
   scene.value = 'result';
   playerPoint.value -= bettingPoint.value;
+  saveBlackJackHistory(
+    'LOSE',
+    playerHands as Card[],
+    dealerHands as Card[],
+    bettingPoint.value
+  );
 };
 </script>
 
