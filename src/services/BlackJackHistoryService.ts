@@ -31,7 +31,7 @@ export const saveBlackJackHistory = async (
     suit: hand.suit,
     rank: hand.rank,
   }));
-  const totalPoint = store.getters.getGamePoint();
+  const totalPoint = store.getters.getGamePoint;
   const blackJackHistoryType: BlackJackHistoryType = {
     userId,
     playingDateTime,
