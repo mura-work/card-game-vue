@@ -1,5 +1,9 @@
 import { createStore } from 'vuex';
 import { initializeCardImages } from '../utils/image-utils/index';
+import {
+  getGamePointFromSession,
+  setGamePointFromSession,
+} from '../utils/sessionStorage';
 
 type State = {
   gamePoint: number;
@@ -20,9 +24,17 @@ const store = createStore<State>({
     },
   },
   actions: {
+    initializeGamePoint({ commit }) {
+      const gamePoint = getGamePointFromSession();
+      commit('setGamePoint', gamePoint);
+    },
     initializeCardImageList({ commit }) {
       const cardImageList = initializeCardImages();
       commit('setCardImageList', cardImageList);
+    },
+    setGamePointFromSessionAndStore({ commit }, data) {
+      setGamePointFromSession(data);
+      commit('setGamePoint', data);
     },
   },
   getters: {
