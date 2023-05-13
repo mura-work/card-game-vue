@@ -4,15 +4,8 @@ import { onMounted, reactive, ref, computed } from 'vue';
 import { mdiInformation } from '@mdi/js';
 import Card from '../models/Card';
 import { useStore } from 'vuex';
-import {
-  getGamePointFromSession,
-  setGamePointFromSession,
-} from '../utils/sessionStorage';
 import PlayerHandCard from '../components/PlayerHandCard.vue';
-import {
-  saveBlackJackHistory,
-  fetchBlackJackHistory,
-} from '../services/BlackJackHistoryService';
+import { saveBlackJackHistory } from '../services/BlackJackHistoryService';
 
 const RESULT_ALERT_PROPS = {
   WIN: {
@@ -62,12 +55,9 @@ const alertDialog = reactive({
 });
 const displayHelpActions = ref(false);
 const isPlayerOneTurnEnd = ref(false);
+const isDouble = ref(false);
 
 onMounted(() => {
-  fetchBlackJackHistory();
-  const gamePoint = getGamePointFromSession();
-  store.commit('setGamePoint', gamePoint);
-  playerPoint.value = store.getters.getGamePoint;
   init();
 });
 
@@ -81,6 +71,8 @@ const playerHandsProps = computed({
 });
 
 const init = () => {
+  store.dispatch('initializeGamePoint');
+  playerPoint.value = store.getters.getGamePoint;
   isPlayerOneTurnEnd.value = false;
   bettingPoint.value = 0;
   dealerHands.splice(0);
@@ -114,6 +106,12 @@ const sleep = (time: number) =>
 const hit = async () => {
   const newCard = deck.pick();
   playerHands.push(newCard);
+
+  // プレイヤーの手札が21以上であればゲーム終了
+  if (calculateHandTotal(playerHands as Card[]) > 21) {
+    judge();
+  }
+
   if (!isPlayerOneTurnEnd.value) {
     isPlayerOneTurnEnd.value = true;
     // ディーラーの手札が17以上になるように手札を引き続ける
@@ -127,19 +125,20 @@ const hit = async () => {
       return;
     };
     await recursionDealerHands();
+
+    // ディーラーが21以上であればゲーム終了
     if (calculateHandTotal(dealerHands as Card[]) > 21) {
-      judge(); // ディーラーが21以上であればゲーム終了
+      judge();
     }
   }
 };
 
 const double = () => {
+  isDouble.value = true;
   hit();
-  bettingPoint.value *= 2;
 };
 
 const calculateHandTotal = (hands: Card[]) => {
-  console.log({ hands });
   return hands.reduce((prev, cur) => {
     const rank = cur.getRankNumber();
     const score = rank > 10 ? 10 : rank; // 11以上は10に揃える
@@ -173,6 +172,10 @@ const judge = async () => {
     resultValue = 'WIN';
   }
 
+  if (isDouble.value) {
+    bettingPoint.value *= 2;
+  }
+
   if (
     resultValue !== 'DRAW' &&
     (calculateHandTotal(dealerHands as Card[]) === 21 ||
@@ -188,6 +191,7 @@ const judge = async () => {
     differenceValue = Math.floor(bettingPoint.value * 1.5) - bettingPoint.value;
   }
   playerPoint.value += differenceValue;
+  store.dispatch('setGamePointFromSessionAndStore', playerPoint.value);
 
   resultDialog = {
     ...resultAlertProps,
@@ -199,14 +203,14 @@ const judge = async () => {
     resultValue,
     playerHands as Card[],
     dealerHands as Card[],
-    bettingPoint.value
+    differenceValue
   );
 };
 
 const close = () => {
   resultDialog.display = false;
   scene.value = 'betting';
-  setGamePointFromSession(playerPoint.value);
+  store.dispatch('setGamePointFromSessionAndStore', playerPoint.value);
   init();
 };
 

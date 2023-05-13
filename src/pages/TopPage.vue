@@ -31,7 +31,7 @@ const openGame = (path: string) => router.push(path);
         class="mx-auto"
         max-width="300"
         min-width="300"
-        @click="() => openGame('/brack-jack')"
+        @click="() => openGame('/black-jack')"
       >
         <v-img
           class="align-end font-bold"
@@ -39,7 +39,7 @@ const openGame = (path: string) => router.push(path);
           :src="BlackJackImg"
           cover
         >
-          <v-card-title>Brack Jack</v-card-title>
+          <v-card-title>Black Jack</v-card-title>
         </v-img>
 
         <v-card-subtitle class="pt-4"> 2023-04 </v-card-subtitle>
