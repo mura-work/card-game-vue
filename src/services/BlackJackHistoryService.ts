@@ -1,4 +1,7 @@
-import { BlackJackHistoryType } from '../types/index';
+import {
+  BlackJackHistoryType,
+  fetchedBlackJackHistoryType,
+} from '../types/index';
 import { aspidaClient } from './api';
 import api from '../../api/$api';
 import Card from '../models/Card';
@@ -9,9 +12,9 @@ const apiClient = {
 };
 
 export const fetchBlackJackHistory = async () => {
-  const histories =
-    await apiClient.blackJackHistory.v1.black_jack_histories.get();
-  return histories;
+  const result = await apiClient.blackJackHistory.v1.black_jack_histories.get();
+  const histories = result.body;
+  return histories as unknown as fetchedBlackJackHistoryType[];
 };
 
 export const saveBlackJackHistory = async (
@@ -25,10 +28,12 @@ export const saveBlackJackHistory = async (
   const mappedPlayerHands = playerHands.map((hand) => ({
     suit: hand.suit,
     rank: hand.rank,
+    imageId: hand.imageId,
   }));
   const mappedDealerHands = dealerHands.map((hand) => ({
     suit: hand.suit,
     rank: hand.rank,
+    imageId: hand.imageId,
   }));
   const totalPoint = store.getters.getGamePoint;
   const blackJackHistoryType: BlackJackHistoryType = {
