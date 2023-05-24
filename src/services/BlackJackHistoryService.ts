@@ -12,6 +12,10 @@ const apiClient = {
 };
 
 export const fetchBlackJackHistory = async () => {
+  const mock = true;
+  if (mock) {
+    return [];
+  }
   const result = await apiClient.blackJackHistory.v1.black_jack_histories.get();
   const histories = result.body;
   return histories as unknown as fetchedBlackJackHistoryType[];
@@ -23,6 +27,10 @@ export const saveBlackJackHistory = async (
   dealerHands: Card[],
   pointDifference: number
 ) => {
+  const mock = true;
+  if (mock) {
+    return;
+  }
   const userId = 1000; // dummy data
   const playingDateTime = new Date(); // バックエンドでデータが作成された時間にする
   const mappedPlayerHands = playerHands.map((hand) => ({

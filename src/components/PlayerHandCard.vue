@@ -33,7 +33,7 @@ const getCardImage = (imageId: number) => {
       <template v-for="(card, i) in props.playerHands" :key="card.imageId">
         <v-img
           v-if="props.isCardFront && i === 0"
-          class="card-front font-bold inline-block mr-8"
+          class="card-front font-bold inline-flex mr-8"
           height="140"
           width="100"
           :src="CardFront"
@@ -41,7 +41,7 @@ const getCardImage = (imageId: number) => {
         />
         <v-img
           v-else
-          class="font-bold inline-block mr-8"
+          class="font-bold inline-flex mr-8"
           height="140"
           width="100"
           :src="getCardImage(card.imageId)"
