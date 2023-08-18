@@ -6,6 +6,8 @@ import Card from '../models/Card';
 import { useStore } from 'vuex';
 import PlayerHandCard from '../components/PlayerHandCard.vue';
 import { saveBlackJackHistory } from '../services/BlackJackHistoryService';
+import BasicDialog from '../components/BasicDialog.vue';
+import { useDialog } from '../composable/dialog';
 
 const RESULT_ALERT_PROPS = {
   WIN: {
@@ -325,32 +327,18 @@ const surrender = () => {
     </div>
   </div>
   <!-- ベットポイントに関するエラーダイアログ -->
-  <v-dialog v-model="alertDialog.display" persistent width="auto">
-    <v-card>
-      <v-card-title>{{ alertDialog.title }}</v-card-title>
-      <v-card-text>
-        {{ alertDialog.text }}
-      </v-card-text>
-      <v-card-actions>
-        <v-btn color="primary" block @click="alertDialog.display = false">
-          Close
-        </v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
+  <BasicDialog
+    :is-show="alertDialog.display"
+    :title="alertDialog.title"
+    :main-message="alertDialog.text"
+    @close="alertDialog.display = false"
+  />
   <!-- 勝敗の結果ダイアログ -->
-  <v-dialog :model-value="resultDialog.display" persistent width="auto">
-    <v-card>
-      <v-card-title>{{ resultDialog.title }}</v-card-title>
-      <v-card-text>
-        {{ resultDialog.text }}
-      </v-card-text>
-      <v-card-text>
-        {{ resultDialog.message }}
-      </v-card-text>
-      <v-card-actions>
-        <v-btn color="primary" block @click="close()"> Close </v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
+  <BasicDialog
+    :is-show="resultDialog.display"
+    :title="resultDialog.title"
+    :main-message="resultDialog.text"
+    :sub-message="resultDialog.message"
+    @close="close()"
+  />
 </template>
