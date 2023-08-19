@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import BlackJackVue from '../pages/BlackJack.vue';
+import BlackJackVue from '../pages/black-jack-game/BlackJack.vue';
 import TopPage from '../pages/TopPage.vue';
-import BlackJackHistoryVue from '../pages/BlackJackHistory.vue';
+import BlackJackHistoryVue from '../pages/black-jack-history/BlackJackHistory.vue';
 
 const routes = [
   {

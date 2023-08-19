@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, reactive, ref, computed } from 'vue';
-import { fetchBlackJackHistory } from '../services/BlackJackHistoryService';
-import { fetchedBlackJackHistoryType } from '../types/index';
+import { fetchBlackJackHistory } from '../../services/BlackJackHistoryService';
+import { fetchedBlackJackHistoryType } from '../../types/index';
 import { useStore } from 'vuex';
 
 const gameHistories = reactive<fetchedBlackJackHistoryType[]>([]);

@@ -1,11 +1,14 @@
 <script setup lang="ts">
-import Deck from '../models/Deck';
+import Deck from '../../models/Deck';
 import { onMounted, reactive, ref, computed } from 'vue';
 import { mdiInformation } from '@mdi/js';
-import Card from '../models/Card';
+import Card from '../../models/Card';
 import { useStore } from 'vuex';
-import PlayerHandCard from '../components/PlayerHandCard.vue';
-import { saveBlackJackHistory } from '../services/BlackJackHistoryService';
+import PlayerHandCard from '../../components/PlayerHandCard.vue';
+import { saveBlackJackHistory } from '../../services/BlackJackHistoryService';
+import BasicDialog from '../../components/BasicDialog.vue';
+import { useDialog } from '../../composable/dialog';
+import PointBetting from './PointBetting.vue';
 
 const RESULT_ALERT_PROPS = {
   WIN: {
@@ -25,13 +28,13 @@ const RESULT_ALERT_PROPS = {
   },
 };
 
-type SceneType = 'betting' | 'actions' | 'result';
+type SceneType = 'loading' | 'betting' | 'actions' | 'result';
 // type ActionType = 'surrender' | 'stand' | 'hit' | 'double';
 // type ResultType = 'win' | 'lose' | 'draw';
 
 const store = useStore();
 
-const scene = ref<SceneType>('betting');
+const scene = ref<SceneType>('loading');
 const playerPoint = ref<number>(0);
 const bettingPoint = ref<number>(0);
 const dealerHands = reactive<Card[]>([]);
@@ -48,11 +51,7 @@ let resultDialog = reactive<{
   text: '',
   message: '',
 });
-const alertDialog = reactive({
-  display: false,
-  title: '',
-  text: '',
-});
+
 const displayHelpActions = ref(false);
 const isPlayerOneTurnEnd = ref(false);
 const isDouble = ref(false);
@@ -79,24 +78,11 @@ const init = () => {
   playerHands.splice(0);
   dealerHands.push(deck.pick(), deck.pick());
   playerHands.push(deck.pick(), deck.pick());
+  scene.value = 'betting';
 };
 
-const confirmBettingPoint = () => {
-  if (bettingPoint.value <= 0) {
-    Object.assign(alertDialog, {
-      display: true,
-      title: '警告',
-      text: 'ポイントが入力されていません。入力をやり直してください',
-    });
-    return;
-  } else if (bettingPoint.value > playerPoint.value) {
-    Object.assign(alertDialog, {
-      display: true,
-      title: '警告',
-      text: '所持ポイントよりも入力ポイントの方が多いです。所持ポイントを上回らないようにしてください',
-    });
-    return;
-  }
+const confirmBettingPoint = (inputValue: number) => {
+  bettingPoint.value = inputValue;
   scene.value = 'actions';
 };
 
@@ -235,30 +221,11 @@ const surrender = () => {
   <div
     class="h-screen w-screen bg-green-800 flex justify-between flex-col p-12"
   >
-    <div v-if="scene === 'betting'" class="text-center">
-      <h2 class="text-white font-bold text-4xl mb-16">Betting</h2>
-      <div class="text-white font-bold mb-4 text-center">
-        現在の所持Pt: {{ playerPoint }}
-      </div>
-      <div class="flex justify-center mb-8">
-        <input
-          v-model="bettingPoint"
-          class="bg-white text-right h-7"
-          type="number"
-          min="1"
-          :max="playerPoint"
-        />
-        <v-btn
-          :disabled="bettingPoint <= 0"
-          class="ml-4 bg-blue"
-          size="small"
-          @click="confirmBettingPoint"
-        >
-          確定
-        </v-btn>
-      </div>
-      <span class="text-white font-bold">掛け金を入力してください。</span>
-    </div>
+    <!-- Bettingページ -->
+    <PointBetting
+      v-if="scene === 'betting'"
+      @confirm-betting-point="confirmBettingPoint"
+    />
     <!-- ディーラーの手札 -->
     <div
       v-if="['actions', 'result'].includes(scene)"
@@ -324,33 +291,12 @@ const surrender = () => {
       </div>
     </div>
   </div>
-  <!-- ベットポイントに関するエラーダイアログ -->
-  <v-dialog v-model="alertDialog.display" persistent width="auto">
-    <v-card>
-      <v-card-title>{{ alertDialog.title }}</v-card-title>
-      <v-card-text>
-        {{ alertDialog.text }}
-      </v-card-text>
-      <v-card-actions>
-        <v-btn color="primary" block @click="alertDialog.display = false">
-          Close
-        </v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
   <!-- 勝敗の結果ダイアログ -->
-  <v-dialog :model-value="resultDialog.display" persistent width="auto">
-    <v-card>
-      <v-card-title>{{ resultDialog.title }}</v-card-title>
-      <v-card-text>
-        {{ resultDialog.text }}
-      </v-card-text>
-      <v-card-text>
-        {{ resultDialog.message }}
-      </v-card-text>
-      <v-card-actions>
-        <v-btn color="primary" block @click="close()"> Close </v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
+  <BasicDialog
+    :is-show="resultDialog.display"
+    :title="resultDialog.title"
+    :main-message="resultDialog.text"
+    :sub-message="resultDialog.message"
+    @close="close()"
+  />
 </template>
